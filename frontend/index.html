@@ -6,6 +6,8 @@
     <title>PayFlow AI - Smart Payment Intelligence</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
     <div class="app-layout">
@@ -18,6 +20,7 @@
                 <li><a href="#transactions-section"><span class="nav-icon">&#8644;</span> Transactions</a></li>
                 <li><a href="#brain-section"><span class="nav-icon">&#9733;</span> PayFlow Brain</a></li>
                 <li><a href="#insights-section"><span class="nav-icon">&#9881;</span> AI Insights</a></li>
+                <li><a href="#reports-section"><span class="nav-icon">&#128196;</span> Reports</a></li>
             </ul>
             <div class="sidebar-bottom">
                 <span class="demo-badge" id="demoBadge">DEMO MODE</span>
@@ -97,6 +100,61 @@
                 </div>
             </section>
 
+            <section class="panel reports-panel" id="reports-section">
+                <div class="panel-header">
+                    <span class="panel-icon">&#128196;</span>
+                    <h2>Download Reports</h2>
+                </div>
+                <p class="report-desc">Export your financial data as PDF reports</p>
+
+                <div class="report-filters">
+                    <div class="filter-group">
+                        <label>Date Range</label>
+                        <select id="reportDateRange" onchange="toggleCustomDate()">
+                            <option value="30">Last 30 Days</option>
+                            <option value="60">Last 2 Months</option>
+                            <option value="90">Last 3 Months</option>
+                            <option value="180">Last 6 Months</option>
+                            <option value="365">Last Year</option>
+                            <option value="custom">Custom Range</option>
+                        </select>
+                    </div>
+                    <div class="filter-group custom-date-row" id="customDateRow" style="display:none;">
+                        <label>From</label>
+                        <input type="date" id="reportDateFrom" />
+                        <label>To</label>
+                        <input type="date" id="reportDateTo" />
+                    </div>
+                </div>
+
+                <div class="report-buttons">
+                    <button class="report-btn" onclick="downloadPDF('transactions')">
+                        <span class="report-btn-icon">&#8644;</span>
+                        <span>Transactions</span>
+                    </button>
+                    <button class="report-btn" onclick="downloadPDF('categories')">
+                        <span class="report-btn-icon">&#128200;</span>
+                        <span>Spending by Category</span>
+                    </button>
+                    <button class="report-btn" onclick="downloadPDF('income-expenses')">
+                        <span class="report-btn-icon">&#128202;</span>
+                        <span>Income vs Expenses</span>
+                    </button>
+                    <button class="report-btn" onclick="downloadPDF('insights')">
+                        <span class="report-btn-icon">&#9889;</span>
+                        <span>AI Insights</span>
+                    </button>
+                    <button class="report-btn" onclick="downloadPDF('brain')">
+                        <span class="report-btn-icon">&#129504;</span>
+                        <span>Brain Chat History</span>
+                    </button>
+                    <button class="report-btn report-btn-full" onclick="downloadPDF('full')">
+                        <span class="report-btn-icon">&#128218;</span>
+                        <span>Full Financial Report</span>
+                    </button>
+                </div>
+            </section>
+
             <section class="transactions-panel" id="transactions-section">
                 <h2>Recent Transactions</h2>
                 <table id="transactionsTable">
@@ -119,5 +177,6 @@
     </footer>
 
     <script src="js/app.js"></script>
+    <script src="js/reports.js"></script>
 </body>
 </html>
