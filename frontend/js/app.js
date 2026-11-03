@@ -161,6 +161,29 @@ function renderTransactions(transactions) {
     `).join('');
 }
 
+function saveBrainChat() {
+    try {
+        const msgs = [];
+        document.querySelectorAll('#brainChat .brain-msg').forEach(m => {
+            msgs.push({ role: m.classList.contains('user') ? 'user' : 'bot', text: m.textContent });
+        });
+        localStorage.setItem('payflow_brain_chat', JSON.stringify(msgs));
+    } catch (e) {}
+}
+
+function loadBrainChat() {
+    try {
+        const saved = localStorage.getItem('payflow_brain_chat');
+        if (!saved) return;
+        const msgs = JSON.parse(saved);
+        const chat = document.getElementById('brainChat');
+        msgs.forEach(m => {
+            chat.innerHTML += `<div class="brain-msg ${m.role}">${m.text}</div>`;
+        });
+        chat.scrollTop = chat.scrollHeight;
+    } catch (e) {}
+}
+
 async function askBrain() {
     const input = document.getElementById('brainInput');
     const question = input.value.trim();
@@ -182,6 +205,7 @@ async function askBrain() {
         chat.innerHTML += `<div class="brain-msg bot">Sorry, I couldn't process that. Try again.</div>`;
     }
     chat.scrollTop = chat.scrollHeight;
+    saveBrainChat();
 }
 
 function askPreset(q) {
@@ -193,4 +217,5 @@ document.getElementById('brainInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') askBrain();
 });
 
+loadBrainChat();
 loadDashboard();
