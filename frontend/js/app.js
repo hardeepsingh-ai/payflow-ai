@@ -10,18 +10,34 @@ function formatDate(dateStr) {
     return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
+function animateValue(el, target, prefix = '£') {
+    const duration = 1200;
+    const isNeg = target < 0;
+    const abs = Math.abs(target);
+    const start = performance.now();
+
+    function step(now) {
+        const progress = Math.min((now - start) / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 3);
+        const current = abs * ease;
+        el.textContent = (isNeg ? '-' : '') + prefix + current.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+}
+
 async function loadDashboard() {
     try {
         const resp = await fetch(`${API_URL}/api/dashboard`);
         const data = await resp.json();
 
-        document.getElementById('balance').textContent = formatCurrency(data.balance);
-        document.getElementById('income').textContent = formatCurrency(data.total_income);
-        document.getElementById('expenses').textContent = formatCurrency(data.total_expenses);
+        animateValue(document.getElementById('balance'), data.balance);
+        animateValue(document.getElementById('income'), data.total_income);
+        animateValue(document.getElementById('expenses'), data.total_expenses);
 
         const netEl = document.getElementById('netFlow');
-        netEl.textContent = formatCurrency(data.net_flow);
-        netEl.style.color = data.net_flow >= 0 ? '#1db954' : '#e74c3c';
+        animateValue(netEl, data.net_flow);
+        netEl.style.color = data.net_flow >= 0 ? '#00c853' : '#ff5252';
 
         const insights = data.insights;
         document.getElementById('insightSummary').textContent = insights.summary;
@@ -50,9 +66,9 @@ function renderCategoryChart(categories) {
         .sort((a, b) => b[1] - a[1]);
 
     const colors = [
-        '#003087', '#0070ba', '#ffc439', '#1db954', '#e74c3c',
-        '#9b59b6', '#f39c12', '#3498db', '#2ecc71', '#e67e22',
-        '#1abc9c', '#34495e', '#95a5a6'
+        '#0070ba', '#ffc439', '#ff5252', '#00c853', '#7c4dff',
+        '#ff6d00', '#00bcd4', '#e040fb', '#64dd17', '#ffab00',
+        '#18ffff', '#536dfe', '#b0bec5'
     ];
 
     new Chart(document.getElementById('categoryChart'), {
@@ -62,14 +78,19 @@ function renderCategoryChart(categories) {
             datasets: [{
                 data: expenseCategories.map(([, v]) => v),
                 backgroundColor: colors.slice(0, expenseCategories.length),
-                borderWidth: 2,
-                borderColor: '#fff',
+                borderWidth: 0,
+                hoverBorderWidth: 2,
+                hoverBorderColor: '#fff',
             }]
         },
         options: {
             responsive: true,
+            cutout: '65%',
             plugins: {
-                legend: { position: 'right', labels: { boxWidth: 12, font: { size: 12 } } }
+                legend: {
+                    position: 'right',
+                    labels: { boxWidth: 10, font: { size: 11 }, color: '#8892a4', padding: 8 }
+                }
             }
         }
     });
@@ -97,23 +118,32 @@ function renderFlowChart(transactions) {
                 {
                     label: 'Income',
                     data: sorted.map(([, v]) => v.income),
-                    backgroundColor: '#1db954',
+                    backgroundColor: 'rgba(0, 200, 83, 0.7)',
                     borderRadius: 4,
                 },
                 {
                     label: 'Expenses',
                     data: sorted.map(([, v]) => v.expenses),
-                    backgroundColor: '#e74c3c',
+                    backgroundColor: 'rgba(255, 82, 82, 0.7)',
                     borderRadius: 4,
                 }
             ]
         },
         options: {
             responsive: true,
-            plugins: { legend: { labels: { boxWidth: 12, font: { size: 12 } } } },
+            plugins: {
+                legend: { labels: { boxWidth: 10, font: { size: 11 }, color: '#8892a4' } }
+            },
             scales: {
-                y: { beginAtZero: true, ticks: { callback: v => '£' + v.toLocaleString() } },
-                x: { ticks: { font: { size: 11 } } }
+                y: {
+                    beginAtZero: true,
+                    ticks: { callback: v => '£' + v.toLocaleString(), color: '#8892a4', font: { size: 10 } },
+                    grid: { color: 'rgba(30, 42, 66, 0.5)' }
+                },
+                x: {
+                    ticks: { color: '#8892a4', font: { size: 10 } },
+                    grid: { display: false }
+                }
             }
         }
     });

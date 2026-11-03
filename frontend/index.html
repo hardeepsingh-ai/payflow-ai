@@ -8,86 +8,114 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 <body>
-    <header>
-        <div class="header-content">
-            <h1>PayFlow <span class="ai-badge">AI</span></h1>
-            <p class="subtitle">Smart Payment Intelligence for SMEs</p>
-            <span class="demo-badge" id="demoBadge">DEMO MODE</span>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <h1><span class="logo-icon">P</span> PayFlow <span class="ai-badge">AI</span></h1>
+            </div>
+            <ul class="sidebar-nav">
+                <li><a href="#" class="active"><span class="nav-icon">&#9632;</span> Dashboard</a></li>
+                <li><a href="#transactions-section"><span class="nav-icon">&#8644;</span> Transactions</a></li>
+                <li><a href="#brain-section"><span class="nav-icon">&#9733;</span> PayFlow Brain</a></li>
+                <li><a href="#insights-section"><span class="nav-icon">&#9881;</span> AI Insights</a></li>
+            </ul>
+            <div class="sidebar-bottom">
+                <span class="demo-badge" id="demoBadge">DEMO MODE</span>
+                <p class="powered-by">PayPal API + Claude AI<br>Hackathon 2026</p>
+            </div>
+        </aside>
+
+        <div class="main-content">
+            <div class="page-header">
+                <div>
+                    <h2 class="page-title">Payment Dashboard</h2>
+                    <p class="page-subtitle">Aberdeen Chiropractic Clinic — PayPal Account</p>
+                </div>
+                <div class="connection-status">
+                    <span class="status-dot"></span>
+                    <span>Connected</span>
+                </div>
+            </div>
+
+            <section class="stats-grid">
+                <div class="stat-card balance">
+                    <div class="stat-icon">&#128176;</div>
+                    <span class="stat-label">Current Balance</span>
+                    <span class="stat-value" id="balance">--</span>
+                </div>
+                <div class="stat-card income">
+                    <div class="stat-icon">&#8593;</div>
+                    <span class="stat-label">Income (30d)</span>
+                    <span class="stat-value" id="income">--</span>
+                </div>
+                <div class="stat-card expenses">
+                    <div class="stat-icon">&#8595;</div>
+                    <span class="stat-label">Expenses (30d)</span>
+                    <span class="stat-value" id="expenses">--</span>
+                </div>
+                <div class="stat-card net">
+                    <div class="stat-icon">&#9733;</div>
+                    <span class="stat-label">Net Cash Flow</span>
+                    <span class="stat-value" id="netFlow">--</span>
+                </div>
+            </section>
+
+            <section class="panel" id="insights-section">
+                <div class="panel-header">
+                    <span class="panel-icon">&#9889;</span>
+                    <h2>AI Insights</h2>
+                </div>
+                <p class="insight-summary" id="insightSummary">Loading...</p>
+                <div class="alerts" id="alerts"></div>
+                <div class="forecast" id="forecast"></div>
+                <div class="saving-tip" id="savingTip"></div>
+            </section>
+
+            <section class="charts-grid">
+                <div class="chart-card">
+                    <h3>Spending by Category</h3>
+                    <canvas id="categoryChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Income vs Expenses</h3>
+                    <canvas id="flowChart"></canvas>
+                </div>
+            </section>
+
+            <section class="brain-panel" id="brain-section">
+                <h2>&#129504; PayFlow Brain</h2>
+                <p class="brain-desc">Ask your financial brain anything about your transactions</p>
+                <div class="brain-chat" id="brainChat"></div>
+                <div class="brain-input-row">
+                    <input type="text" id="brainInput" placeholder="e.g. Why is my marketing spend so high?" />
+                    <button id="brainAsk" onclick="askBrain()">Ask</button>
+                </div>
+                <div class="brain-suggestions">
+                    <button class="suggestion" onclick="askPreset('What are the Instagram boost charges?')">Instagram charges?</button>
+                    <button class="suggestion" onclick="askPreset('Where am I spending the most?')">Top spending?</button>
+                    <button class="suggestion" onclick="askPreset('How is my cash flow?')">Cash flow?</button>
+                </div>
+            </section>
+
+            <section class="transactions-panel" id="transactions-section">
+                <h2>Recent Transactions</h2>
+                <table id="transactionsTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionsBody"></tbody>
+                </table>
+            </section>
         </div>
-    </header>
-
-    <main>
-        <section class="stats-grid">
-            <div class="stat-card balance">
-                <span class="stat-label">Current Balance</span>
-                <span class="stat-value" id="balance">--</span>
-            </div>
-            <div class="stat-card income">
-                <span class="stat-label">Income (30d)</span>
-                <span class="stat-value" id="income">--</span>
-            </div>
-            <div class="stat-card expenses">
-                <span class="stat-label">Expenses (30d)</span>
-                <span class="stat-value" id="expenses">--</span>
-            </div>
-            <div class="stat-card net">
-                <span class="stat-label">Net Cash Flow</span>
-                <span class="stat-value" id="netFlow">--</span>
-            </div>
-        </section>
-
-        <section class="insights-panel">
-            <h2>AI Insights</h2>
-            <p class="insight-summary" id="insightSummary">Loading...</p>
-            <div class="alerts" id="alerts"></div>
-            <div class="forecast" id="forecast"></div>
-            <div class="saving-tip" id="savingTip"></div>
-        </section>
-
-        <section class="charts-grid">
-            <div class="chart-card">
-                <h3>Spending by Category</h3>
-                <canvas id="categoryChart"></canvas>
-            </div>
-            <div class="chart-card">
-                <h3>Income vs Expenses</h3>
-                <canvas id="flowChart"></canvas>
-            </div>
-        </section>
-
-        <section class="brain-panel">
-            <h2>PayFlow Brain</h2>
-            <p class="brain-desc">Ask your financial brain anything about your transactions</p>
-            <div class="brain-chat" id="brainChat"></div>
-            <div class="brain-input-row">
-                <input type="text" id="brainInput" placeholder="e.g. Why is my marketing spend so high?" />
-                <button id="brainAsk" onclick="askBrain()">Ask</button>
-            </div>
-            <div class="brain-suggestions">
-                <button class="suggestion" onclick="askPreset('What are the Instagram boost charges?')">Instagram charges?</button>
-                <button class="suggestion" onclick="askPreset('Where am I spending the most?')">Top spending?</button>
-                <button class="suggestion" onclick="askPreset('How is my cash flow?')">Cash flow?</button>
-            </div>
-        </section>
-
-        <section class="transactions-panel">
-            <h2>Recent Transactions</h2>
-            <table id="transactionsTable">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Description</th>
-                        <th>Category</th>
-                        <th>Amount</th>
-                    </tr>
-                </thead>
-                <tbody id="transactionsBody"></tbody>
-            </table>
-        </section>
-    </main>
+    </div>
 
     <footer>
-        <p>PayFlow AI - Built for the PayPal AI Hackathon 2026 | Powered by PayPal API + Claude AI</p>
+        PayFlow AI — Built for the PayPal AI Hackathon 2026 | Powered by PayPal API + Claude AI
     </footer>
 
     <script src="js/app.js"></script>
