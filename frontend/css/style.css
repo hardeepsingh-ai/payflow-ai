@@ -167,6 +167,48 @@ tr:hover { background: #f8f9fa; }
     white-space: nowrap;
 }
 
+.brain-panel {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    border-left: 4px solid var(--primary);
+}
+
+.brain-panel h2 { font-size: 18px; margin-bottom: 4px; color: var(--primary); }
+.brain-desc { font-size: 13px; color: var(--text-light); margin-bottom: 16px; }
+
+.brain-chat {
+    min-height: 60px;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 12px;
+}
+
+.brain-msg { padding: 10px 14px; border-radius: 10px; margin-bottom: 8px; font-size: 14px; line-height: 1.5; }
+.brain-msg.user { background: #eef2ff; text-align: right; }
+.brain-msg.bot { background: #e8f5e9; }
+
+.brain-input-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.brain-input-row input {
+    flex: 1; padding: 10px 14px; border: 2px solid var(--border); border-radius: 8px;
+    font-size: 14px; outline: none; transition: border-color 0.2s;
+}
+.brain-input-row input:focus { border-color: var(--primary); }
+.brain-input-row button {
+    background: var(--primary); color: white; border: none; padding: 10px 20px;
+    border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px;
+}
+.brain-input-row button:hover { background: var(--primary-light); }
+
+.brain-suggestions { display: flex; gap: 8px; flex-wrap: wrap; }
+.suggestion {
+    background: #f0f4ff; border: 1px solid var(--border); padding: 6px 12px;
+    border-radius: 16px; font-size: 12px; cursor: pointer; color: var(--primary);
+}
+.suggestion:hover { background: #dde5ff; }
+
 footer {
     text-align: center;
     padding: 20px;

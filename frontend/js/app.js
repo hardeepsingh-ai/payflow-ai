@@ -2,7 +2,7 @@ const API_URL = '';
 
 function formatCurrency(amount) {
     const sign = amount >= 0 ? '' : '-';
-    return `${sign}$${Math.abs(amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `${sign}£${Math.abs(amount).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 function formatDate(dateStr) {
@@ -112,7 +112,7 @@ function renderFlowChart(transactions) {
             responsive: true,
             plugins: { legend: { labels: { boxWidth: 12, font: { size: 12 } } } },
             scales: {
-                y: { beginAtZero: true, ticks: { callback: v => '$' + v.toLocaleString() } },
+                y: { beginAtZero: true, ticks: { callback: v => '£' + v.toLocaleString() } },
                 x: { ticks: { font: { size: 11 } } }
             }
         }
@@ -130,5 +130,37 @@ function renderTransactions(transactions) {
         </tr>
     `).join('');
 }
+
+async function askBrain() {
+    const input = document.getElementById('brainInput');
+    const question = input.value.trim();
+    if (!question) return;
+
+    const chat = document.getElementById('brainChat');
+    chat.innerHTML += `<div class="brain-msg user">${question}</div>`;
+    input.value = '';
+
+    try {
+        const resp = await fetch(`${API_URL}/api/brain`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question }),
+        });
+        const data = await resp.json();
+        chat.innerHTML += `<div class="brain-msg bot">${data.answer}</div>`;
+    } catch {
+        chat.innerHTML += `<div class="brain-msg bot">Sorry, I couldn't process that. Try again.</div>`;
+    }
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function askPreset(q) {
+    document.getElementById('brainInput').value = q;
+    askBrain();
+}
+
+document.getElementById('brainInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') askBrain();
+});
 
 loadDashboard();

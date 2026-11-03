@@ -55,6 +55,21 @@
             </div>
         </section>
 
+        <section class="brain-panel">
+            <h2>PayFlow Brain</h2>
+            <p class="brain-desc">Ask your financial brain anything about your transactions</p>
+            <div class="brain-chat" id="brainChat"></div>
+            <div class="brain-input-row">
+                <input type="text" id="brainInput" placeholder="e.g. Why is my marketing spend so high?" />
+                <button id="brainAsk" onclick="askBrain()">Ask</button>
+            </div>
+            <div class="brain-suggestions">
+                <button class="suggestion" onclick="askPreset('What are the Instagram boost charges?')">Instagram charges?</button>
+                <button class="suggestion" onclick="askPreset('Where am I spending the most?')">Top spending?</button>
+                <button class="suggestion" onclick="askPreset('How is my cash flow?')">Cash flow?</button>
+            </div>
+        </section>
+
         <section class="transactions-panel">
             <h2>Recent Transactions</h2>
             <table id="transactionsTable">
