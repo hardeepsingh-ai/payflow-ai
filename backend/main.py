@@ -145,12 +145,18 @@ async def ask_brain(query: BrainQuery):
     system_prompt = "You are PayFlow Brain, an AI financial assistant for Aberdeen Chiropractic Clinic's PayPal account. Answer questions about the business's transactions concisely and helpfully. Use £ for currency. If you spot issues like unexpected auto-charges, flag them."
 
     if os.getenv("GEMINI_API_KEY"):
-        import google.generativeai as genai
-        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-        model = genai.GenerativeModel("gemini-2.0-flash")
-        resp = model.generate_content(f"{system_prompt}\n\nContext: {context}\n\nQuestion: {query.question}")
-        answer = resp.text
-    elif os.getenv("ANTHROPIC_API_KEY"):
+        try:
+            import google.generativeai as genai
+            genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            resp = model.generate_content(f"{system_prompt}\n\nContext: {context}\n\nQuestion: {query.question}")
+            answer = resp.text
+        except Exception as e:
+            print(f"Gemini error: {e}")
+            answer = None
+        if answer:
+            return {"answer": answer}
+    if os.getenv("ANTHROPIC_API_KEY"):
         import anthropic
         client = anthropic.Anthropic()
         msg = client.messages.create(
