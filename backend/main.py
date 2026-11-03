@@ -146,11 +146,16 @@ async def ask_brain(query: BrainQuery):
 
     if os.getenv("GEMINI_API_KEY"):
         try:
-            import google.generativeai as genai
-            genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-            model = genai.GenerativeModel("gemini-1.5-flash")
-            resp = model.generate_content(f"{system_prompt}\n\nContext: {context}\n\nQuestion: {query.question}")
-            answer = resp.text
+            import httpx
+            gemini_key = os.getenv("GEMINI_API_KEY")
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_key}"
+            payload = {
+                "contents": [{"parts": [{"text": f"{system_prompt}\n\nContext: {context}\n\nQuestion: {query.question}"}]}],
+                "generationConfig": {"maxOutputTokens": 400, "temperature": 0.7}
+            }
+            resp = httpx.post(url, json=payload, timeout=15)
+            data = resp.json()
+            answer = data["candidates"][0]["content"]["parts"][0]["text"]
         except Exception as e:
             print(f"Gemini error: {e}")
             answer = None
