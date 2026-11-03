@@ -27,9 +27,22 @@ function animateValue(el, target, prefix = '£') {
 }
 
 async function loadDashboard() {
+    document.querySelectorAll('.stat-value').forEach(el => {
+        el.textContent = '';
+        el.classList.add('skeleton');
+        el.style.height = '28px';
+        el.style.width = '120px';
+    });
+
     try {
         const resp = await fetch(`${API_URL}/api/dashboard`);
         const data = await resp.json();
+
+        document.querySelectorAll('.stat-value').forEach(el => {
+            el.classList.remove('skeleton');
+            el.style.height = '';
+            el.style.width = '';
+        });
 
         animateValue(document.getElementById('balance'), data.balance);
         animateValue(document.getElementById('income'), data.total_income);
@@ -193,6 +206,12 @@ async function askBrain() {
     chat.innerHTML += `<div class="brain-msg user">${question}</div>`;
     input.value = '';
 
+    const thinking = document.createElement('div');
+    thinking.className = 'brain-msg bot thinking';
+    thinking.innerHTML = '<span class="dot-pulse"></span> Thinking...';
+    chat.appendChild(thinking);
+    chat.scrollTop = chat.scrollHeight;
+
     try {
         const resp = await fetch(`${API_URL}/api/brain`, {
             method: 'POST',
@@ -200,12 +219,19 @@ async function askBrain() {
             body: JSON.stringify({ question }),
         });
         const data = await resp.json();
+        thinking.remove();
         chat.innerHTML += `<div class="brain-msg bot">${data.answer}</div>`;
     } catch {
+        thinking.remove();
         chat.innerHTML += `<div class="brain-msg bot">Sorry, I couldn't process that. Try again.</div>`;
     }
     chat.scrollTop = chat.scrollHeight;
     saveBrainChat();
+}
+
+function clearBrainChat() {
+    document.getElementById('brainChat').innerHTML = '';
+    try { localStorage.removeItem('payflow_brain_chat'); } catch (e) {}
 }
 
 function askPreset(q) {

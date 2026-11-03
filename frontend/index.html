@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PayFlow AI - Smart Payment Intelligence</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23003087'/><text x='16' y='22' text-anchor='middle' font-family='Arial' font-weight='800' font-size='18' fill='white'>P</text><circle cx='26' cy='6' r='5' fill='%23ffc439'/><text x='26' y='9' text-anchor='middle' font-family='Arial' font-weight='800' font-size='8' fill='%23003087'>AI</text></svg>">
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -24,7 +25,7 @@
             </ul>
             <div class="sidebar-bottom">
                 <span class="demo-badge" id="demoBadge">DEMO MODE</span>
-                <p class="powered-by">PayPal API + Claude AI<br>Hackathon 2026</p>
+                <p class="powered-by">PayPal API + Gemini AI<br>Hackathon 2026</p>
             </div>
         </aside>
 
@@ -86,7 +87,10 @@
             </section>
 
             <section class="brain-panel" id="brain-section">
-                <h2>&#129504; PayFlow Brain</h2>
+                <div class="brain-header-row">
+                    <h2>&#129504; PayFlow Brain</h2>
+                    <button class="clear-chat-btn" onclick="clearBrainChat()" title="Clear chat history">Clear Chat</button>
+                </div>
                 <p class="brain-desc">Ask your financial brain anything about your transactions</p>
                 <div class="brain-chat" id="brainChat"></div>
                 <div class="brain-input-row">
@@ -173,7 +177,7 @@
     </div>
 
     <footer>
-        PayFlow AI — Built for the PayPal AI Hackathon 2026 | Powered by PayPal API + Claude AI
+        PayFlow AI — Built for the PayPal AI Hackathon 2026 | Powered by PayPal API + Gemini AI
     </footer>
 
     <script src="js/app.js"></script>
