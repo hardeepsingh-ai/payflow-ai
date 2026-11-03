@@ -182,15 +182,15 @@ body {
 /* ── Stats ── */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
     margin-bottom: 24px;
 }
 
 .stat-card {
     background: var(--bg-card);
     border-radius: 12px;
-    padding: 20px;
+    padding: 16px;
     border: 1px solid var(--border);
     position: relative;
     overflow: hidden;
@@ -243,7 +243,7 @@ body {
 
 .stat-value {
     display: block;
-    font-size: 26px;
+    font-size: 22px;
     font-weight: 700;
     color: #fff;
 }
