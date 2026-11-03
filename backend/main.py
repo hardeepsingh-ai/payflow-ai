@@ -144,23 +144,27 @@ async def ask_brain(query: BrainQuery):
 
     system_prompt = "You are PayFlow Brain, an AI financial assistant for Aberdeen Chiropractic Clinic's PayPal account. Answer questions about the business's transactions concisely and helpfully. Use £ for currency. If you spot issues like unexpected auto-charges, flag them."
 
-    if os.getenv("GEMINI_API_KEY"):
+    gemini_key = os.getenv("GEMINI_API_KEY")
+    if gemini_key:
         try:
             import httpx
-            gemini_key = os.getenv("GEMINI_API_KEY")
+            print(f"Using Gemini API (key starts with: {gemini_key[:8]}...)")
             url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_key}"
             payload = {
                 "contents": [{"parts": [{"text": f"{system_prompt}\n\nContext: {context}\n\nQuestion: {query.question}"}]}],
                 "generationConfig": {"maxOutputTokens": 400, "temperature": 0.7}
             }
             resp = httpx.post(url, json=payload, timeout=15)
+            print(f"Gemini response status: {resp.status_code}")
+            if resp.status_code != 200:
+                print(f"Gemini error response: {resp.text[:300]}")
             data = resp.json()
             answer = data["candidates"][0]["content"]["parts"][0]["text"]
+            return {"answer": answer}
         except Exception as e:
             print(f"Gemini error: {e}")
-            answer = None
-        if answer:
-            return {"answer": answer}
+    else:
+        print("No GEMINI_API_KEY found in environment")
     if os.getenv("ANTHROPIC_API_KEY"):
         import anthropic
         client = anthropic.Anthropic()
