@@ -154,20 +154,68 @@ async def ask_brain(query: BrainQuery):
         answer = msg.content[0].text
     else:
         q = query.question.lower()
+        top_cats = sorted(categories.items(), key=lambda x: x[1], reverse=True)
+        expense_cats = {k: v for k, v in top_cats if not k.startswith("Revenue")}
+        income_cats = {k: v for k, v in top_cats if k.startswith("Revenue")}
+        boost_txns = [t for t in txns if "boost post" in t["name"].lower()]
+        boost_total = sum(abs(t["amount"]) for t in boost_txns)
+        highest = sorted(txns, key=lambda t: abs(t["amount"]), reverse=True)[:5]
+        recent = txns[:5]
+
         if "boost" in q or "instagram" in q:
-            boost_txns = [t for t in txns if "boost post" in t["name"].lower()]
-            boost_total = sum(abs(t["amount"]) for t in boost_txns)
             answer = f"I found {len(boost_txns)} Instagram Boost Post charges totalling £{boost_total:,.2f}. These appear to be auto-charged from a connected Instagram account. I'd recommend disconnecting PayPal from Instagram's boost feature to prevent further unexpected charges."
-        elif "spend" in q or "expense" in q:
-            top = sorted(categories.items(), key=lambda x: x[1], reverse=True)[:3]
-            answer = f"Your top spending categories are: {', '.join(f'{c}: £{v:,.2f}' for c, v in top)}. Total expenses this month: £{total_expenses:,.2f}."
-        elif "income" in q or "revenue" in q or "earn" in q:
-            answer = f"Total income this month: £{total_income:,.2f}. Net cash flow: £{total_income - total_expenses:,.2f}."
-        elif "marketing" in q or "ads" in q:
+        elif "highest" in q or "biggest" in q or "largest" in q or "top" in q:
+            lines = [f"  • {t['name']}: £{abs(t['amount']):,.2f}" for t in highest]
+            answer = f"Your highest transactions:\n" + "\n".join(lines)
+        elif "recent" in q or "latest" in q or "last" in q:
+            lines = [f"  • {t['name']}: £{t['amount']:+,.2f} ({t.get('ai_category', 'Other')})" for t in recent]
+            answer = f"Most recent transactions:\n" + "\n".join(lines)
+        elif "spend" in q or "expense" in q or "cost" in q or "paid" in q or "paying" in q:
+            top3 = list(expense_cats.items())[:3]
+            answer = f"Your top spending categories: {', '.join(f'{c}: £{v:,.2f}' for c, v in top3)}. Total expenses: £{total_expenses:,.2f}."
+        elif "income" in q or "revenue" in q or "earn" in q or "payment" in q or "money coming" in q:
+            lines = [f"  • {c}: £{v:,.2f}" for c, v in income_cats.items()]
+            answer = f"Total income: £{total_income:,.2f}. Breakdown:\n" + "\n".join(lines) if lines else f"Total income: £{total_income:,.2f}."
+        elif "marketing" in q or "ads" in q or "meta" in q or "facebook" in q:
             m = categories.get("Marketing & Advertising", 0)
-            answer = f"Marketing & Advertising spend: £{m:,.2f}. This includes Meta Ads, Google Ads, and Instagram Boost Posts. Check if all boost posts are intentional."
+            pct = (m / total_expenses * 100) if total_expenses else 0
+            answer = f"Marketing & Advertising: £{m:,.2f} ({pct:.0f}% of expenses). This includes {len(boost_txns)} auto-charged Instagram Boost Posts (£{boost_total:,.2f}). Review these — they may be unauthorised."
+        elif "rent" in q or "utilit" in q or "bill" in q:
+            r = categories.get("Rent & Utilities", 0)
+            answer = f"Rent & Utilities: £{r:,.2f}. This covers clinic rent, electricity, and business insurance."
+        elif "staff" in q or "payroll" in q or "employee" in q or "receptionist" in q:
+            s = categories.get("Staff & Payroll", 0)
+            answer = f"Staff & Payroll: £{s:,.2f}. This covers receptionist pay and cleaning services."
+        elif "suppli" in q or "inventory" in q:
+            c = categories.get("Clinic Supplies", 0)
+            answer = f"Clinic Supplies: £{c:,.2f}. Includes treatment table covers, massage oils, resistance bands, and KT tape."
+        elif "software" in q or "subscription" in q or "cliniko" in q:
+            sw = categories.get("Software & Subscriptions", 0)
+            answer = f"Software & Subscriptions: £{sw:,.2f}. Includes Cliniko (practice management), online booking system, and Canva Pro."
+        elif "save" in q or "saving" in q or "cut" in q or "reduce" in q:
+            answer = f"Top saving opportunities: 1) Review {len(boost_txns)} Instagram auto-charges (£{boost_total:,.2f}) — these may be unauthorised. 2) Compare clinic supply vendors for better rates. 3) Your marketing is {categories.get('Marketing & Advertising', 0) / total_expenses * 100:.0f}% of spend — audit ROI per channel."
+        elif "profit" in q or "net" in q or "cash flow" in q or "balance" in q:
+            net = total_income - total_expenses
+            status = "positive" if net >= 0 else "negative"
+            answer = f"Net cash flow: £{net:,.2f} ({status}). Income: £{total_income:,.2f}, Expenses: £{total_expenses:,.2f}. {'Your expenses exceed income — review discretionary spending.' if net < 0 else 'Healthy position — consider setting aside reserves.'}"
+        elif "categor" in q or "breakdown" in q or "summary" in q or "overview" in q:
+            lines = [f"  • {c}: £{v:,.2f}" for c, v in top_cats]
+            answer = f"Full category breakdown:\n" + "\n".join(lines)
+        elif "alert" in q or "warning" in q or "problem" in q or "issue" in q or "wrong" in q:
+            alerts = []
+            if boost_total > 0:
+                alerts.append(f"{len(boost_txns)} Instagram auto-charges totalling £{boost_total:,.2f}")
+            if total_expenses > total_income:
+                alerts.append(f"Expenses (£{total_expenses:,.2f}) exceed income (£{total_income:,.2f})")
+            mkt = categories.get("Marketing & Advertising", 0)
+            if mkt > total_expenses * 0.2:
+                alerts.append(f"Marketing is {mkt/total_expenses*100:.0f}% of expenses")
+            answer = "Alerts:\n" + "\n".join(f"  ⚠️ {a}" for a in alerts) if alerts else "No critical alerts right now. Your account looks healthy."
+        elif "help" in q or "what can" in q or "how" in q:
+            answer = "I can help with: transaction analysis, spending breakdowns, income reports, alerts & warnings, category summaries, saving tips, cash flow forecasts, and marketing spend analysis. Just ask!"
         else:
-            answer = f"Your business has £{total_income:,.2f} income and £{total_expenses:,.2f} expenses this month (net: £{total_income - total_expenses:,.2f}). Ask me about specific categories, spending patterns, or alerts."
+            net = total_income - total_expenses
+            answer = f"Here's your overview: Income £{total_income:,.2f}, Expenses £{total_expenses:,.2f}, Net £{net:,.2f}. Top expense: {list(expense_cats.keys())[0] if expense_cats else 'N/A'} (£{list(expense_cats.values())[0] if expense_cats else 0:,.2f}). {len(boost_txns)} Instagram auto-charges found (£{boost_total:,.2f}). Ask me about any category, alerts, savings, or specific transactions!"
 
     return {"answer": answer}
 
