@@ -142,13 +142,21 @@ async def ask_brain(query: BrainQuery):
         f"Recent transactions: {[{'name': t['name'], 'amount': t['amount'], 'category': t.get('ai_category', 'Other')} for t in txns[:15]]}"
     )
 
-    if os.getenv("ANTHROPIC_API_KEY"):
+    system_prompt = "You are PayFlow Brain, an AI financial assistant for Aberdeen Chiropractic Clinic's PayPal account. Answer questions about the business's transactions concisely and helpfully. Use £ for currency. If you spot issues like unexpected auto-charges, flag them."
+
+    if os.getenv("GEMINI_API_KEY"):
+        import google.generativeai as genai
+        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+        model = genai.GenerativeModel("gemini-2.0-flash")
+        resp = model.generate_content(f"{system_prompt}\n\nContext: {context}\n\nQuestion: {query.question}")
+        answer = resp.text
+    elif os.getenv("ANTHROPIC_API_KEY"):
         import anthropic
         client = anthropic.Anthropic()
         msg = client.messages.create(
             model="claude-sonnet-4-20250514",
             max_tokens=300,
-            system="You are PayFlow Brain, an AI financial assistant. Answer questions about the business's PayPal transactions concisely. Use £ for currency.",
+            system=system_prompt,
             messages=[{"role": "user", "content": f"Context: {context}\n\nQuestion: {query.question}"}],
         )
         answer = msg.content[0].text
