@@ -149,7 +149,7 @@ async def ask_brain(query: BrainQuery):
         try:
             import httpx
             print(f"Using Gemini API (key starts with: {gemini_key[:8]}...)")
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key={gemini_key}"
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key={gemini_key}"
             payload = {
                 "contents": [{"parts": [{"text": f"{system_prompt}\n\nContext: {context}\n\nQuestion: {query.question}"}]}],
                 "generationConfig": {"maxOutputTokens": 400, "temperature": 0.7}
