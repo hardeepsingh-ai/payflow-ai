@@ -122,6 +122,8 @@ async function loadDashboard() {
     const welcome = document.getElementById('welcomeScreen');
     if (welcome) welcome.style.display = 'none';
 
+    try { localStorage.setItem('payflow_loaded', '1'); } catch (e) {}
+
     showSkeletons();
 
     try {
@@ -534,5 +536,11 @@ window.addEventListener('scroll', () => {
     if (btn) btn.classList.toggle('visible', window.scrollY > 400);
 });
 
-// Auto-load dashboard (welcome screen hides once data loads)
-loadDashboard();
+// Show welcome screen on first visit, auto-load for returning users
+try {
+    if (localStorage.getItem('payflow_loaded')) {
+        loadDashboard();
+    }
+} catch (e) {
+    loadDashboard();
+}
