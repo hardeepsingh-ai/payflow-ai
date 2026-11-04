@@ -82,19 +82,19 @@ async def get_dashboard():
         cat = t.get("ai_category", "Other")
         categories[cat] = round(categories.get(cat, 0) + abs(t["amount"]), 2)
 
-    # Smart alerts — detect real problems like unexpected recurring charges
+    # Smart alerts -detect real problems like unexpected recurring charges
     alerts = []
     boost_txns = [t for t in transactions if "boost post" in t["name"].lower()]
     boost_total = sum(abs(t["amount"]) for t in boost_txns)
     if boost_txns:
-        alerts.append(f"WARNING: {len(boost_txns)} Instagram Boost Posts detected totalling £{boost_total:,.2f} — these may be auto-charged. Review immediately!")
+        alerts.append(f"WARNING: {len(boost_txns)} Instagram Boost Posts detected totalling £{boost_total:,.2f} -these may be auto-charged. Review immediately!")
     marketing_spend = sum(abs(t["amount"]) for t in transactions if t.get("ai_category") == "Marketing & Advertising")
     if marketing_spend > 0:
         pct = round(marketing_spend / total_expenses * 100) if total_expenses else 0
         alerts.append(f"Marketing & Advertising is {pct}% of total expenses (£{marketing_spend:,.2f})")
     sub_spend = sum(abs(t["amount"]) for t in transactions if t.get("ai_category") == "Software & SaaS")
     if sub_spend > 100:
-        alerts.append(f"Software subscriptions total £{sub_spend:,.2f} this month — check for unused tools")
+        alerts.append(f"Software subscriptions total £{sub_spend:,.2f} this month -check for unused tools")
 
     if os.getenv("ANTHROPIC_API_KEY") and not USE_DEMO:
         insights = await generate_insights(transactions, balance)
@@ -103,7 +103,7 @@ async def get_dashboard():
             "summary": f"Your business processed £{total_income:,.2f} in income and £{total_expenses:,.2f} in expenses over the last 30 days. Net cash flow is £{net_flow:,.2f}.",
             "alerts": alerts,
             "forecast": f"Based on current trends, projected balance in 30 days: £{balance + net_flow:,.2f}",
-            "top_saving": "Review Instagram Boost Posts — auto-charges can accumulate without you noticing" if boost_txns else "Consider consolidating SaaS subscriptions to reduce monthly costs",
+            "top_saving": "Review Instagram Boost Posts -auto-charges can accumulate without you noticing" if boost_txns else "Consider consolidating SaaS subscriptions to reduce monthly costs",
         }
 
     return {
@@ -198,7 +198,7 @@ async def ask_brain(query: BrainQuery):
         elif "marketing" in q or "ads" in q or "meta" in q or "facebook" in q:
             m = categories.get("Marketing & Advertising", 0)
             pct = (m / total_expenses * 100) if total_expenses else 0
-            answer = f"Marketing & Advertising: £{m:,.2f} ({pct:.0f}% of expenses). This includes {len(boost_txns)} auto-charged Instagram Boost Posts (£{boost_total:,.2f}). Review these — they may be unauthorised."
+            answer = f"Marketing & Advertising: £{m:,.2f} ({pct:.0f}% of expenses). This includes {len(boost_txns)} auto-charged Instagram Boost Posts (£{boost_total:,.2f}). Review these -they may be unauthorised."
         elif "rent" in q or "utilit" in q or "bill" in q:
             r = categories.get("Rent & Utilities", 0)
             answer = f"Rent & Utilities: £{r:,.2f}. This covers clinic rent, electricity, and business insurance."
@@ -212,11 +212,11 @@ async def ask_brain(query: BrainQuery):
             sw = categories.get("Software & Subscriptions", 0)
             answer = f"Software & Subscriptions: £{sw:,.2f}. Includes Cliniko (practice management), online booking system, and Canva Pro."
         elif "save" in q or "saving" in q or "cut" in q or "reduce" in q:
-            answer = f"Top saving opportunities: 1) Review {len(boost_txns)} Instagram auto-charges (£{boost_total:,.2f}) — these may be unauthorised. 2) Compare clinic supply vendors for better rates. 3) Your marketing is {categories.get('Marketing & Advertising', 0) / total_expenses * 100:.0f}% of spend — audit ROI per channel."
+            answer = f"Top saving opportunities: 1) Review {len(boost_txns)} Instagram auto-charges (£{boost_total:,.2f}) -these may be unauthorised. 2) Compare clinic supply vendors for better rates. 3) Your marketing is {categories.get('Marketing & Advertising', 0) / total_expenses * 100:.0f}% of spend -audit ROI per channel."
         elif "profit" in q or "net" in q or "cash flow" in q or "balance" in q:
             net = total_income - total_expenses
             status = "positive" if net >= 0 else "negative"
-            answer = f"Net cash flow: £{net:,.2f} ({status}). Income: £{total_income:,.2f}, Expenses: £{total_expenses:,.2f}. {'Your expenses exceed income — review discretionary spending.' if net < 0 else 'Healthy position — consider setting aside reserves.'}"
+            answer = f"Net cash flow: £{net:,.2f} ({status}). Income: £{total_income:,.2f}, Expenses: £{total_expenses:,.2f}. {'Your expenses exceed income -review discretionary spending.' if net < 0 else 'Healthy position -consider setting aside reserves.'}"
         elif "categor" in q or "breakdown" in q or "summary" in q or "overview" in q:
             lines = [f"  • {c}: £{v:,.2f}" for c, v in top_cats]
             answer = f"Full category breakdown:\n" + "\n".join(lines)

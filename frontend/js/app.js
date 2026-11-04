@@ -106,7 +106,7 @@ async function loadDashboard() {
 
         if (alerts.length > 0) {
             setTimeout(() => {
-                showToast(`&#9888; <strong>${alerts.length} alert${alerts.length > 1 ? 's' : ''} detected</strong> — ${alerts[0].substring(0, 80)}...`, 'warning');
+                showToast(`&#9888; <strong>${alerts.length} alert${alerts.length > 1 ? 's' : ''} detected</strong> -${alerts[0].substring(0, 80)}...`, 'warning');
             }, 2000);
         }
     } catch (err) {
@@ -338,7 +338,7 @@ function subscribeDigest() {
         return;
     }
     closeEmailDigest();
-    showToast(`&#9989; <strong>Daily digest enabled!</strong> Financial summaries will be sent to ${email} every morning. (Demo — not active in sandbox mode)`, 'success');
+    showToast(`&#9989; <strong>Daily digest enabled!</strong> Financial summaries will be sent to ${email} every morning. (Demo -not active in sandbox mode)`, 'success');
 }
 
 function toggleTheme() {
