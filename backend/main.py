@@ -148,23 +148,19 @@ async def ask_brain(query: BrainQuery):
     if gemini_key:
         try:
             import httpx
-            print(f"Using Gemini API (key starts with: {gemini_key[:8]}...)")
             url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key={gemini_key}"
             payload = {
                 "contents": [{"parts": [{"text": f"{system_prompt}\n\nContext: {context}\n\nQuestion: {query.question}"}]}],
                 "generationConfig": {"maxOutputTokens": 400, "temperature": 0.7}
             }
             resp = httpx.post(url, json=payload, timeout=15)
-            print(f"Gemini response status: {resp.status_code}")
-            if resp.status_code != 200:
-                print(f"Gemini error response: {resp.text[:300]}")
             data = resp.json()
             answer = data["candidates"][0]["content"]["parts"][0]["text"]
             return {"answer": answer}
-        except Exception as e:
-            print(f"Gemini error: {e}")
+        except Exception:
+            pass
     else:
-        print("No GEMINI_API_KEY found in environment")
+        pass
     if os.getenv("ANTHROPIC_API_KEY"):
         import anthropic
         client = anthropic.Anthropic()

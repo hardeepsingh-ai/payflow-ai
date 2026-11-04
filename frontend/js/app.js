@@ -10,6 +10,16 @@ function formatDate(dateStr) {
     return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
+function renderMarkdown(text) {
+    return text
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/^[\s]*[-•]\s+(.+)/gm, '<li>$1</li>')
+        .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+        .replace(/<\/ul>\s*<ul>/g, '')
+        .replace(/\n/g, '<br>');
+}
+
 function animateValue(el, target, prefix = '£') {
     const duration = 1200;
     const isNeg = target < 0;
@@ -26,23 +36,47 @@ function animateValue(el, target, prefix = '£') {
     requestAnimationFrame(step);
 }
 
-async function loadDashboard() {
+function showToast(message, type = 'warning') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = message;
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('show'));
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, 6000);
+}
+
+function showSkeletons() {
     document.querySelectorAll('.stat-value').forEach(el => {
         el.textContent = '';
         el.classList.add('skeleton');
         el.style.height = '28px';
         el.style.width = '120px';
     });
+    document.getElementById('insightSummary').innerHTML = '<div class="skeleton" style="height:16px;width:80%;margin-bottom:8px;"></div><div class="skeleton" style="height:16px;width:60%;"></div>';
+    document.getElementById('transactionsBody').innerHTML = Array(5).fill(0).map(() =>
+        `<tr><td><div class="skeleton" style="height:14px;width:70px;"></div></td><td><div class="skeleton" style="height:14px;width:150px;"></div></td><td><div class="skeleton" style="height:14px;width:80px;"></div></td><td><div class="skeleton" style="height:14px;width:60px;"></div></td></tr>`
+    ).join('');
+}
+
+function removeSkeletons() {
+    document.querySelectorAll('.stat-value').forEach(el => {
+        el.classList.remove('skeleton');
+        el.style.height = '';
+        el.style.width = '';
+    });
+}
+
+async function loadDashboard() {
+    showSkeletons();
 
     try {
         const resp = await fetch(`${API_URL}/api/dashboard`);
         const data = await resp.json();
 
-        document.querySelectorAll('.stat-value').forEach(el => {
-            el.classList.remove('skeleton');
-            el.style.height = '';
-            el.style.width = '';
-        });
+        removeSkeletons();
 
         animateValue(document.getElementById('balance'), data.balance);
         animateValue(document.getElementById('income'), data.total_income);
@@ -56,7 +90,8 @@ async function loadDashboard() {
         document.getElementById('insightSummary').textContent = insights.summary;
 
         const alertsEl = document.getElementById('alerts');
-        alertsEl.innerHTML = (insights.alerts || [])
+        const alerts = insights.alerts || [];
+        alertsEl.innerHTML = alerts
             .map(a => `<div class="alert-item">&#9888; ${a}</div>`).join('');
 
         document.getElementById('forecast').innerHTML = insights.forecast
@@ -68,7 +103,14 @@ async function loadDashboard() {
         renderCategoryChart(data.categories);
         renderFlowChart(data.transactions);
         renderTransactions(data.transactions);
+
+        if (alerts.length > 0) {
+            setTimeout(() => {
+                showToast(`&#9888; <strong>${alerts.length} alert${alerts.length > 1 ? 's' : ''} detected</strong> — ${alerts[0].substring(0, 80)}...`, 'warning');
+            }, 2000);
+        }
     } catch (err) {
+        removeSkeletons();
         document.getElementById('insightSummary').textContent = 'Unable to connect to API. Start the backend server first.';
     }
 }
@@ -164,6 +206,10 @@ function renderFlowChart(transactions) {
 
 function renderTransactions(transactions) {
     const tbody = document.getElementById('transactionsBody');
+    if (!transactions || transactions.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No transactions found. Connect your PayPal account to see data.</td></tr>';
+        return;
+    }
     tbody.innerHTML = transactions.map(t => `
         <tr>
             <td>${formatDate(t.date)}</td>
@@ -177,8 +223,8 @@ function renderTransactions(transactions) {
 function saveBrainChat() {
     try {
         const msgs = [];
-        document.querySelectorAll('#brainChat .brain-msg').forEach(m => {
-            msgs.push({ role: m.classList.contains('user') ? 'user' : 'bot', text: m.textContent });
+        document.querySelectorAll('#brainChat .brain-msg:not(.thinking)').forEach(m => {
+            msgs.push({ role: m.classList.contains('user') ? 'user' : 'bot', html: m.innerHTML });
         });
         localStorage.setItem('payflow_brain_chat', JSON.stringify(msgs));
     } catch (e) {}
@@ -191,7 +237,7 @@ function loadBrainChat() {
         const msgs = JSON.parse(saved);
         const chat = document.getElementById('brainChat');
         msgs.forEach(m => {
-            chat.innerHTML += `<div class="brain-msg ${m.role}">${m.text}</div>`;
+            chat.innerHTML += `<div class="brain-msg ${m.role}">${m.html || m.text || ''}</div>`;
         });
         chat.scrollTop = chat.scrollHeight;
     } catch (e) {}
@@ -220,7 +266,9 @@ async function askBrain() {
         });
         const data = await resp.json();
         thinking.remove();
-        chat.innerHTML += `<div class="brain-msg bot">${data.answer}</div>`;
+        const rendered = renderMarkdown(data.answer);
+        const actionHtml = detectAgenticAction(data.answer);
+        chat.innerHTML += `<div class="brain-msg bot">${rendered}${actionHtml}</div>`;
     } catch {
         thinking.remove();
         chat.innerHTML += `<div class="brain-msg bot">Sorry, I couldn't process that. Try again.</div>`;
@@ -229,9 +277,44 @@ async function askBrain() {
     saveBrainChat();
 }
 
+function detectAgenticAction(answer) {
+    const lower = answer.toLowerCase();
+    if (lower.includes('auto-charged') || lower.includes('recurring charge') || lower.includes('instagram boost')) {
+        return `<div class="brain-action"><button class="action-btn" onclick="simulateAction('pause')">&#9209; Pause this recurring charge</button><button class="action-btn action-secondary" onclick="simulateAction('alert')">&#128276; Set up alert for this</button></div>`;
+    }
+    if (lower.includes('subscription') || lower.includes('cancel')) {
+        return `<div class="brain-action"><button class="action-btn" onclick="simulateAction('review')">&#128269; Review subscription details</button></div>`;
+    }
+    return '';
+}
+
+function simulateAction(type) {
+    const messages = {
+        pause: '&#9989; <strong>Charge paused.</strong> Instagram Boost auto-charge has been flagged for review. In production, this would send a PayPal API request to suspend the billing agreement.',
+        alert: '&#128276; <strong>Alert set.</strong> You\'ll be notified whenever a new Instagram or Facebook auto-charge appears on your account.',
+        review: '&#128269; <strong>Subscription review initiated.</strong> In production, PayFlow would pull the full billing agreement details from PayPal.'
+    };
+    showToast(messages[type] || 'Action completed.', 'success');
+}
+
 function clearBrainChat() {
-    document.getElementById('brainChat').innerHTML = '';
+    document.getElementById('brainChat').innerHTML = '<div class="empty-state-brain">No messages yet. Ask PayFlow Brain anything about your finances.</div>';
     try { localStorage.removeItem('payflow_brain_chat'); } catch (e) {}
+}
+
+function copyBrainChat() {
+    const msgs = [];
+    document.querySelectorAll('#brainChat .brain-msg').forEach(m => {
+        const role = m.classList.contains('user') ? 'You' : 'Brain';
+        msgs.push(`${role}: ${m.textContent}`);
+    });
+    if (msgs.length === 0) {
+        showToast('No chat to copy.', 'warning');
+        return;
+    }
+    navigator.clipboard.writeText(msgs.join('\n\n')).then(() => {
+        showToast('&#9989; Chat copied to clipboard!', 'success');
+    });
 }
 
 function askPreset(q) {
@@ -239,9 +322,54 @@ function askPreset(q) {
     askBrain();
 }
 
+function showEmailDigest() {
+    const modal = document.getElementById('emailDigestModal');
+    modal.style.display = 'flex';
+}
+
+function closeEmailDigest() {
+    document.getElementById('emailDigestModal').style.display = 'none';
+}
+
+function subscribeDigest() {
+    const email = document.getElementById('digestEmail').value.trim();
+    if (!email || !email.includes('@')) {
+        showToast('Please enter a valid email address.', 'warning');
+        return;
+    }
+    closeEmailDigest();
+    showToast(`&#9989; <strong>Daily digest enabled!</strong> Financial summaries will be sent to ${email} every morning. (Demo — not active in sandbox mode)`, 'success');
+}
+
+function toggleTheme() {
+    const body = document.body;
+    const isLight = body.classList.toggle('light-theme');
+    const btn = document.getElementById('themeToggle');
+    btn.textContent = isLight ? '🌙' : '☀️';
+    try { localStorage.setItem('payflow_theme', isLight ? 'light' : 'dark'); } catch (e) {}
+}
+
+function loadTheme() {
+    try {
+        const saved = localStorage.getItem('payflow_theme');
+        if (saved === 'light') {
+            document.body.classList.add('light-theme');
+            document.getElementById('themeToggle').textContent = '🌙';
+        }
+    } catch (e) {}
+}
+
 document.getElementById('brainInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') askBrain();
+    if (e.key === 'Escape') { e.target.value = ''; }
 });
 
+loadTheme();
 loadBrainChat();
+
+const brainChat = document.getElementById('brainChat');
+if (!brainChat.innerHTML.trim()) {
+    brainChat.innerHTML = '<div class="empty-state-brain">No messages yet. Ask PayFlow Brain anything about your finances.</div>';
+}
+
 loadDashboard();

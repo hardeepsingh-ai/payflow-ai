@@ -11,10 +11,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
+    <button class="hamburger" id="hamburger" onclick="toggleSidebar()">&#9776;</button>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
     <div class="app-layout">
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-logo">
                 <h1><span class="logo-icon">P</span> PayFlow <span class="ai-badge">AI</span></h1>
+                <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">☀️</button>
             </div>
             <ul class="sidebar-nav">
                 <li><a href="#" class="active"><span class="nav-icon">&#9632;</span> Dashboard</a></li>
@@ -25,6 +29,7 @@
             </ul>
             <div class="sidebar-bottom">
                 <span class="demo-badge" id="demoBadge">DEMO MODE</span>
+                <button class="connect-paypal-btn" onclick="showConnectPayPal()">Connect PayPal</button>
                 <p class="powered-by">PayPal API + Gemini AI<br>Hackathon 2026</p>
             </div>
         </aside>
@@ -35,9 +40,12 @@
                     <h2 class="page-title">Payment Dashboard</h2>
                     <p class="page-subtitle">Aberdeen Chiropractic Clinic — PayPal Account</p>
                 </div>
-                <div class="connection-status">
-                    <span class="status-dot"></span>
-                    <span>Connected</span>
+                <div class="header-actions">
+                    <button class="header-btn" onclick="showEmailDigest()" title="Set up daily email digest">&#128231; Daily Digest</button>
+                    <div class="connection-status">
+                        <span class="status-dot"></span>
+                        <span>Connected</span>
+                    </div>
                 </div>
             </div>
 
@@ -89,9 +97,12 @@
             <section class="brain-panel" id="brain-section">
                 <div class="brain-header-row">
                     <h2>&#129504; PayFlow Brain</h2>
-                    <button class="clear-chat-btn" onclick="clearBrainChat()" title="Clear chat history">Clear Chat</button>
+                    <div class="brain-header-actions">
+                        <button class="copy-chat-btn" onclick="copyBrainChat()" title="Copy chat to clipboard">&#128203; Copy</button>
+                        <button class="clear-chat-btn" onclick="clearBrainChat()" title="Clear chat history">Clear Chat</button>
+                    </div>
                 </div>
-                <p class="brain-desc">Ask your financial brain anything about your transactions</p>
+                <p class="brain-desc">Ask your AI financial assistant anything about your transactions</p>
                 <div class="brain-chat" id="brainChat"></div>
                 <div class="brain-input-row">
                     <input type="text" id="brainInput" placeholder="e.g. Why is my marketing spend so high?" />
@@ -101,6 +112,7 @@
                     <button class="suggestion" onclick="askPreset('What are the Instagram boost charges?')">Instagram charges?</button>
                     <button class="suggestion" onclick="askPreset('Where am I spending the most?')">Top spending?</button>
                     <button class="suggestion" onclick="askPreset('How is my cash flow?')">Cash flow?</button>
+                    <button class="suggestion" onclick="askPreset('Should I cancel any subscriptions?')">Cancel subscriptions?</button>
                 </div>
             </section>
 
@@ -176,11 +188,96 @@
         </div>
     </div>
 
+    <!-- Email Digest Modal -->
+    <div class="modal-overlay" id="emailDigestModal" style="display:none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>&#128231; Daily Financial Digest</h3>
+                <button class="modal-close" onclick="closeEmailDigest()">&#10005;</button>
+            </div>
+            <p class="modal-desc">Receive a daily summary of your PayPal activity, including new charges, cash flow updates, and AI-generated insights — straight to your inbox.</p>
+            <div class="modal-preview">
+                <div class="email-preview">
+                    <div class="email-subject"><strong>Subject:</strong> PayFlow AI — Daily Digest for 4 Nov 2026</div>
+                    <div class="email-body">
+                        <p>Good morning! Here's your financial summary:</p>
+                        <p>&#128176; <strong>Balance:</strong> £6,931.96</p>
+                        <p>&#8593; <strong>Income today:</strong> £51.56</p>
+                        <p>&#8595; <strong>Expenses today:</strong> £0.00</p>
+                        <p>&#9888; <strong>Alerts:</strong> 4 Instagram auto-charges detected this month (£96.30 total)</p>
+                        <p>&#128161; <strong>Tip:</strong> Review Instagram Boost Posts — consider pausing automated boosts</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-input-row">
+                <input type="email" id="digestEmail" placeholder="your@email.com" />
+                <button onclick="subscribeDigest()">Subscribe</button>
+            </div>
+            <p class="modal-note">Demo mode — email delivery is simulated</p>
+        </div>
+    </div>
+
+    <!-- Connect PayPal Modal -->
+    <div class="modal-overlay" id="connectPayPalModal" style="display:none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>&#128279; Connect PayPal Account</h3>
+                <button class="modal-close" onclick="closeConnectPayPal()">&#10005;</button>
+            </div>
+            <p class="modal-desc">Link your PayPal business account to see real-time transaction data, AI insights, and smart alerts.</p>
+            <div class="connect-steps">
+                <div class="connect-step">
+                    <span class="step-num">1</span>
+                    <div>
+                        <strong>Authorize PayFlow</strong>
+                        <p>Click below to securely connect via PayPal OAuth</p>
+                    </div>
+                </div>
+                <div class="connect-step">
+                    <span class="step-num">2</span>
+                    <div>
+                        <strong>Grant read access</strong>
+                        <p>PayFlow only reads transactions — it never makes payments</p>
+                    </div>
+                </div>
+                <div class="connect-step">
+                    <span class="step-num">3</span>
+                    <div>
+                        <strong>See your data</strong>
+                        <p>Dashboard populates instantly with your real financial data</p>
+                    </div>
+                </div>
+            </div>
+            <button class="paypal-connect-btn" onclick="simulateConnect()">
+                <span class="paypal-logo">PayPal</span> Connect with PayPal
+            </button>
+            <p class="modal-note">Sandbox mode — connects to PayPal test environment</p>
+        </div>
+    </div>
+
     <footer>
-        PayFlow AI — Built for the PayPal AI Hackathon 2026 | Powered by PayPal API + Gemini AI
+        PayFlow AI — Built for the <a href="https://paypalaihackathon.devpost.com/" target="_blank" rel="noopener">PayPal AI Hackathon 2026</a> |
+        <a href="https://github.com/hardeepsingh-ai/payflow-ai" target="_blank" rel="noopener">GitHub</a> |
+        Powered by PayPal API + Gemini AI
     </footer>
 
     <script src="js/app.js"></script>
     <script src="js/reports.js"></script>
+    <script>
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('sidebarOverlay').classList.toggle('show');
+    }
+    function showConnectPayPal() {
+        document.getElementById('connectPayPalModal').style.display = 'flex';
+    }
+    function closeConnectPayPal() {
+        document.getElementById('connectPayPalModal').style.display = 'none';
+    }
+    function simulateConnect() {
+        closeConnectPayPal();
+        showToast('&#9989; <strong>PayPal sandbox connected!</strong> In production, this would redirect to PayPal OAuth to authorize read-only access to your transactions.', 'success');
+    }
+    </script>
 </body>
 </html>
