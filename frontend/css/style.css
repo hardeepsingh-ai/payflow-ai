@@ -1363,7 +1363,7 @@ footer a:hover { text-decoration: underline; }
     .brain-suggestions { flex-direction: column; }
     .suggestion { text-align: center; }
     .toast { left: 16px; right: 16px; max-width: none; }
-    .notif-panel { width: calc(100vw - 32px); right: -60px; max-width: 340px; }
+    .notif-panel { position: fixed; top: auto; bottom: 60px; left: 16px; right: 16px; width: auto; max-width: none; max-height: 50vh; }
     .notif-bell-wrap { position: static; }
     .transactions-panel { overflow-x: auto; }
     table { min-width: 0; }
@@ -1381,7 +1381,7 @@ footer a:hover { text-decoration: underline; }
     .brain-header-actions { flex-direction: column; gap: 4px; }
     .header-actions { gap: 6px; }
     .header-btn { font-size: 11px; padding: 6px 10px; }
-    .notif-panel { right: -100px; }
+    .notif-panel { left: 8px; right: 8px; }
     .txn-filters { flex-direction: column; }
     .txn-filters input, .txn-filters select { width: 100%; }
 }
