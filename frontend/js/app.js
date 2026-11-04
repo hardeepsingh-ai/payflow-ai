@@ -122,6 +122,8 @@ async function loadDashboard() {
     const welcome = document.getElementById('welcomeScreen');
     if (welcome) welcome.style.display = 'none';
 
+    document.querySelectorAll('.stats-grid, .panel, .charts-grid, .brain-panel, .transactions-panel, #compare-section').forEach(el => el.style.display = '');
+
     try { localStorage.setItem('payflow_loaded', '1'); } catch (e) {}
 
     showSkeletons();
@@ -540,6 +542,8 @@ window.addEventListener('scroll', () => {
 try {
     if (localStorage.getItem('payflow_loaded')) {
         loadDashboard();
+    } else {
+        document.querySelectorAll('.stats-grid, .panel, .charts-grid, .brain-panel, .transactions-panel, #compare-section').forEach(el => el.style.display = 'none');
     }
 } catch (e) {
     loadDashboard();
