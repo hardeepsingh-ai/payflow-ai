@@ -653,18 +653,18 @@ body {
 .toast.show { transform: translateX(0); }
 
 .toast-warning {
-    background: rgba(255, 152, 0, 0.15);
-    border: 1px solid rgba(255, 152, 0, 0.4);
+    background: #1a1000;
+    border: 1px solid #ff9800;
     color: #ffcc80;
 }
 .toast-success {
-    background: rgba(0, 200, 83, 0.15);
-    border: 1px solid rgba(0, 200, 83, 0.4);
+    background: #0a1a0e;
+    border: 1px solid #00c853;
     color: #a5d6a7;
 }
 
-.light-theme .toast-warning { background: #fff3e0; color: #e65100; border-color: #ffcc80; }
-.light-theme .toast-success { background: #e8f5e9; color: #1b5e20; border-color: #a5d6a7; }
+.light-theme .toast-warning { background: #fff3e0; color: #e65100; border-color: #ff9800; }
+.light-theme .toast-success { background: #e8f5e9; color: #1b5e20; border-color: #00c853; }
 
 /* ── Loading Skeleton ── */
 .skeleton {
