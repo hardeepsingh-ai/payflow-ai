@@ -124,8 +124,6 @@ async function loadDashboard() {
 
     document.querySelectorAll('.stats-grid, .panel, .charts-grid, .brain-panel, .transactions-panel, #compare-section').forEach(el => el.style.display = '');
 
-    try { localStorage.setItem('payflow_loaded', '1'); } catch (e) {}
-
     showSkeletons();
 
     try {
@@ -538,13 +536,5 @@ window.addEventListener('scroll', () => {
     if (btn) btn.classList.toggle('visible', window.scrollY > 400);
 });
 
-// Show welcome screen on first visit, auto-load for returning users
-try {
-    if (localStorage.getItem('payflow_loaded')) {
-        loadDashboard();
-    } else {
-        document.querySelectorAll('.stats-grid, .panel, .charts-grid, .brain-panel, .transactions-panel, #compare-section').forEach(el => el.style.display = 'none');
-    }
-} catch (e) {
-    loadDashboard();
-}
+// Always show welcome screen on page load
+document.querySelectorAll('.stats-grid, .panel, .charts-grid, .brain-panel, .transactions-panel, #compare-section').forEach(el => el.style.display = 'none');
