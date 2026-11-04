@@ -139,10 +139,16 @@ async def ask_brain(query: BrainQuery):
         f"Financial data: Income £{total_income:,.2f}, Expenses £{total_expenses:,.2f}, "
         f"Net £{total_income - total_expenses:,.2f}. "
         f"Categories: {categories}. "
-        f"Recent transactions: {[{'name': t['name'], 'amount': t['amount'], 'category': t.get('ai_category', 'Other')} for t in txns[:15]]}"
+        f"All transactions: {[{'name': t['name'], 'amount': t['amount'], 'category': t.get('ai_category', 'Other')} for t in txns]}"
     )
 
-    system_prompt = "You are PayFlow Brain, an AI financial assistant for Aberdeen Chiropractic Clinic's PayPal account. Answer questions about the business's transactions concisely and helpfully. Use £ for currency. If you spot issues like unexpected auto-charges, flag them."
+    system_prompt = (
+        "You are PayFlow Brain, an AI financial assistant for Aberdeen Chiropractic Clinic's PayPal account. "
+        "Rules: 1) Always show your calculations step-by-step. 2) For hypothetical/scenario questions, identify the relevant transactions, "
+        "calculate the numbers, then give a clear YES/NO verdict with the final figure. 3) Use £ for currency. "
+        "4) If a question has multiple conditions, address each one explicitly. 5) End with a concrete recommendation. "
+        "6) Flag unexpected auto-charges like Instagram Boost Posts."
+    )
 
     gemini_key = os.getenv("GEMINI_API_KEY")
     if gemini_key:
@@ -151,7 +157,7 @@ async def ask_brain(query: BrainQuery):
             url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key={gemini_key}"
             payload = {
                 "contents": [{"parts": [{"text": f"{system_prompt}\n\nContext: {context}\n\nQuestion: {query.question}"}]}],
-                "generationConfig": {"maxOutputTokens": 400, "temperature": 0.7}
+                "generationConfig": {"maxOutputTokens": 1000, "temperature": 0.7}
             }
             resp = httpx.post(url, json=payload, timeout=15)
             data = resp.json()
