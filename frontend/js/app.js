@@ -36,16 +36,63 @@ function animateValue(el, target, prefix = '£') {
     requestAnimationFrame(step);
 }
 
+let notifications = [];
+
 function showToast(message, type = 'warning') {
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
-    toast.innerHTML = message;
+    toast.innerHTML = `<div class="toast-content">${message}</div><button class="toast-close" onclick="this.parentElement.classList.remove('show');setTimeout(()=>this.parentElement.remove(),400)">&#10005;</button>`;
     document.body.appendChild(toast);
     requestAnimationFrame(() => toast.classList.add('show'));
     setTimeout(() => {
         toast.classList.remove('show');
         setTimeout(() => toast.remove(), 400);
     }, 6000);
+    addNotification(message, type);
+}
+
+function addNotification(message, type) {
+    const text = message.replace(/<[^>]*>/g, '');
+    const time = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    notifications.unshift({ text, type, time });
+    updateNotifBell();
+}
+
+function updateNotifBell() {
+    const badge = document.getElementById('notifBadge');
+    const list = document.getElementById('notifList');
+    if (!badge || !list) return;
+    const count = notifications.length;
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'flex' : 'none';
+    if (count === 0) {
+        list.innerHTML = '<div class="notif-empty">No notifications yet</div>';
+        return;
+    }
+    list.innerHTML = notifications.map((n, i) => `
+        <div class="notif-item notif-${n.type}">
+            <div class="notif-item-text">${n.text}</div>
+            <div class="notif-item-meta">
+                <span class="notif-time">${n.time}</span>
+                <button class="notif-dismiss" onclick="dismissNotif(${i})">&#10005;</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function dismissNotif(index) {
+    notifications.splice(index, 1);
+    updateNotifBell();
+}
+
+function toggleNotifPanel() {
+    const panel = document.getElementById('notifPanel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+function clearNotifs() {
+    notifications = [];
+    updateNotifBell();
 }
 
 function showSkeletons() {
