@@ -1055,6 +1055,39 @@ tr:hover { background: var(--bg-hover); }
 .gemini-badge { background: rgba(255, 196, 57, 0.15); color: var(--accent); border: 1px solid rgba(255, 196, 57, 0.3); }
 .render-badge { background: rgba(0, 200, 83, 0.1); color: #69f0ae; border: 1px solid rgba(0, 200, 83, 0.2); }
 
+/* ── Scroll to Top ── */
+.scroll-top-btn {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    z-index: 999;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+    box-shadow: 0 4px 16px rgba(0, 112, 186, 0.3);
+}
+.scroll-top-btn.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+.scroll-top-btn:hover { opacity: 0.9; }
+
+/* ── Ask Button States ── */
+.brain-input-row button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 /* ── Footer ── */
 footer {
     text-align: center;

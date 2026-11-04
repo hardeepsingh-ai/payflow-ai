@@ -249,6 +249,10 @@ async function askBrain() {
     const question = input.value.trim();
     if (!question) return;
 
+    const askBtn = document.getElementById('brainAsk');
+    askBtn.disabled = true;
+    askBtn.innerHTML = '<span class="dot-pulse"></span> Thinking...';
+
     const chat = document.getElementById('brainChat');
     chat.innerHTML += `<div class="brain-msg user">${question}</div>`;
     input.value = '';
@@ -274,6 +278,8 @@ async function askBrain() {
         thinking.remove();
         chat.innerHTML += `<div class="brain-msg bot">Sorry, I couldn't process that. Try again.</div>`;
     }
+    askBtn.disabled = false;
+    askBtn.innerHTML = 'Ask';
     chat.scrollTop = chat.scrollHeight;
     saveBrainChat();
 }
@@ -418,5 +424,10 @@ function renderCompareMonths(transactions) {
         changeEl.innerHTML = '<span style="color:var(--text-dim)">No data for last month</span>';
     }
 }
+
+window.addEventListener('scroll', () => {
+    const btn = document.getElementById('scrollTopBtn');
+    if (btn) btn.classList.toggle('visible', window.scrollY > 400);
+});
 
 loadDashboard();

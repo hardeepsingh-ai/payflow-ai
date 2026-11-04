@@ -175,9 +175,9 @@
                 <div class="panel-header">
                     <span class="panel-icon">&#9881;</span>
                     <h2>How It Works</h2>
-                    <button class="header-btn" style="margin-left:auto;" onclick="toggleArchitecture()" aria-label="Toggle architecture diagram">Show / Hide</button>
+                    <button class="header-btn" style="margin-left:auto;" onclick="toggleArchitecture()" aria-label="Toggle architecture diagram">Collapse</button>
                 </div>
-                <div id="architectureDiagram" style="display:none;">
+                <div id="architectureDiagram">
                     <div class="architecture-flow">
                         <div class="arch-step">
                             <div class="arch-icon">&#128179;</div>
@@ -322,6 +322,8 @@
         </div>
     </div>
 
+    <button class="scroll-top-btn" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Scroll to top">&#8593; Top</button>
+
     <footer>
         <div class="powered-badges">
             <span class="powered-badge paypal-badge">PayPal API</span>
@@ -351,7 +353,9 @@
     }
     function toggleArchitecture() {
         const d = document.getElementById('architectureDiagram');
-        d.style.display = d.style.display === 'none' ? 'block' : 'none';
+        const isHidden = d.style.display === 'none';
+        d.style.display = isHidden ? 'block' : 'none';
+        event.target.textContent = isHidden ? 'Collapse' : 'Expand';
     }
     </script>
 </body>

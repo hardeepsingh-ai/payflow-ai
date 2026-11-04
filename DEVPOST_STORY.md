@@ -16,6 +16,10 @@ PayFlow AI is an AI-powered payment intelligence dashboard that turns your PayPa
 - **Cash Flow Forecast** — Predicts your 30-day balance based on current spending trends.
 - **PDF Reports** — Download professional financial reports with date range filtering (last 30 days, 2 months, 3 months, 6 months, year, or custom range). Six report types: Transactions, Spending by Category, Income vs Expenses, AI Insights, Brain Chat History, and a Full Financial Report with branded cover page.
 - **Interactive Charts** — Spending by Category (doughnut) and Income vs Expenses (bar chart) powered by Chart.js.
+- **Agentic Actions** — The Brain doesn't just answer questions, it offers action buttons. Spot a suspicious auto-charge? Click "Pause this recurring charge" or "Set up alert for this" right in the chat. This is the first step toward a fully autonomous financial agent.
+- **Month-over-Month Comparison** — Instantly see how this month's income, expenses, and net compare to last month, with percentage change indicators.
+- **Dark & Light Themes** — Full theme toggle with localStorage persistence, because not everyone works in the dark.
+- **Architecture Diagram** — A built-in "How It Works" section showing the data flow from PayPal API through FastAPI and Gemini AI to the Dashboard, with all tech tags visible.
 
 ## How I built it
 
