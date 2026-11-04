@@ -964,6 +964,97 @@ tr:hover { background: var(--bg-hover); }
 .brain-panel { animation-delay: 0.4s; }
 .transactions-panel { animation-delay: 0.45s; }
 
+/* ── Architecture ── */
+.architecture-flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    padding: 20px 0;
+}
+.arch-step {
+    text-align: center;
+    padding: 16px 20px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    min-width: 130px;
+    transition: border-color 0.2s;
+}
+.arch-step:hover { border-color: var(--primary-light); }
+.arch-icon { font-size: 28px; margin-bottom: 6px; }
+.arch-label { font-size: 13px; font-weight: 600; color: var(--text); }
+.arch-desc { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+.arch-arrow { font-size: 20px; color: var(--primary-light); }
+.arch-tech-tags { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.arch-tag {
+    background: rgba(0, 112, 186, 0.1);
+    border: 1px solid rgba(0, 112, 186, 0.2);
+    color: #82b1ff;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 11px;
+}
+
+/* ── Compare Months ── */
+.compare-grid {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.compare-card {
+    flex: 1;
+    min-width: 180px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+}
+.compare-card h4 { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 12px; }
+.compare-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 13px;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+}
+.compare-row:last-child { border-bottom: none; }
+.compare-net { font-weight: 600; }
+.compare-vs {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-dim);
+}
+.compare-change {
+    width: 100%;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 8px;
+}
+
+/* ── Powered Badges ── */
+.powered-badges {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+.powered-badge {
+    padding: 4px 14px;
+    border-radius: 16px;
+    font-size: 11px;
+    font-weight: 600;
+}
+.paypal-badge { background: rgba(0, 48, 135, 0.2); color: #82b1ff; border: 1px solid rgba(0, 112, 186, 0.3); }
+.gemini-badge { background: rgba(255, 196, 57, 0.15); color: var(--accent); border: 1px solid rgba(255, 196, 57, 0.3); }
+.render-badge { background: rgba(0, 200, 83, 0.1); color: #69f0ae; border: 1px solid rgba(0, 200, 83, 0.2); }
+
 /* ── Footer ── */
 footer {
     text-align: center;

@@ -103,6 +103,7 @@ async function loadDashboard() {
         renderCategoryChart(data.categories);
         renderFlowChart(data.transactions);
         renderTransactions(data.transactions);
+        renderCompareMonths(data.transactions);
 
         if (alerts.length > 0) {
             setTimeout(() => {
@@ -370,6 +371,52 @@ loadBrainChat();
 const brainChat = document.getElementById('brainChat');
 if (!brainChat.innerHTML.trim()) {
     brainChat.innerHTML = '<div class="empty-state-brain">No messages yet. Ask PayFlow Brain anything about your finances.</div>';
+}
+
+function renderCompareMonths(transactions) {
+    const now = new Date();
+    const thisMonth = now.getMonth();
+    const thisYear = now.getFullYear();
+    const lastMonth = thisMonth === 0 ? 11 : thisMonth - 1;
+    const lastYear = thisMonth === 0 ? thisYear - 1 : thisYear;
+
+    let thisIncome = 0, thisExpenses = 0, lastIncome = 0, lastExpenses = 0;
+    transactions.forEach(t => {
+        const d = new Date(t.date);
+        const m = d.getMonth(), y = d.getFullYear();
+        if (m === thisMonth && y === thisYear) {
+            if (t.amount > 0) thisIncome += t.amount;
+            else thisExpenses += Math.abs(t.amount);
+        } else if (m === lastMonth && y === lastYear) {
+            if (t.amount > 0) lastIncome += t.amount;
+            else lastExpenses += Math.abs(t.amount);
+        }
+    });
+
+    const fmt = v => '£' + v.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    document.getElementById('compareIncomeThis').textContent = fmt(thisIncome);
+    document.getElementById('compareExpensesThis').textContent = fmt(thisExpenses);
+    const thisNet = thisIncome - thisExpenses;
+    const netThisEl = document.getElementById('compareNetThis');
+    netThisEl.textContent = (thisNet < 0 ? '-' : '') + fmt(Math.abs(thisNet));
+    netThisEl.className = thisNet >= 0 ? 'amount-positive' : 'amount-negative';
+
+    document.getElementById('compareIncomeLast').textContent = fmt(lastIncome);
+    document.getElementById('compareExpensesLast').textContent = fmt(lastExpenses);
+    const lastNet = lastIncome - lastExpenses;
+    const netLastEl = document.getElementById('compareNetLast');
+    netLastEl.textContent = (lastNet < 0 ? '-' : '') + fmt(Math.abs(lastNet));
+    netLastEl.className = lastNet >= 0 ? 'amount-positive' : 'amount-negative';
+
+    const changeEl = document.getElementById('compareChange');
+    if (lastExpenses > 0) {
+        const pct = ((thisExpenses - lastExpenses) / lastExpenses * 100).toFixed(1);
+        const dir = pct > 0 ? 'up' : 'down';
+        const color = pct > 0 ? '#ff5252' : '#00c853';
+        changeEl.innerHTML = `<span style="color:${color}">Expenses ${dir} ${Math.abs(pct)}% vs last month</span>`;
+    } else {
+        changeEl.innerHTML = '<span style="color:var(--text-dim)">No data for last month</span>';
+    }
 }
 
 loadDashboard();

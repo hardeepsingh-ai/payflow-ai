@@ -11,7 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
-    <button class="hamburger" id="hamburger" onclick="toggleSidebar()">&#9776;</button>
+    <button class="hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="Toggle navigation menu">&#9776;</button>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
     <div class="app-layout">
@@ -29,7 +29,7 @@
             </ul>
             <div class="sidebar-bottom">
                 <span class="demo-badge" id="demoBadge">DEMO MODE</span>
-                <button class="connect-paypal-btn" onclick="showConnectPayPal()">Connect PayPal</button>
+                <button class="connect-paypal-btn" onclick="showConnectPayPal()" aria-label="Connect your PayPal account">Connect PayPal</button>
                 <p class="powered-by">PayPal API + Gemini AI<br>Hackathon 2026</p>
             </div>
         </aside>
@@ -106,7 +106,7 @@
                 <div class="brain-chat" id="brainChat"></div>
                 <div class="brain-input-row">
                     <input type="text" id="brainInput" placeholder="e.g. Why is my marketing spend so high?" />
-                    <button id="brainAsk" onclick="askBrain()">Ask</button>
+                    <button id="brainAsk" onclick="askBrain()" aria-label="Ask PayFlow Brain">Ask</button>
                 </div>
                 <div class="brain-suggestions">
                     <button class="suggestion" onclick="askPreset('What are the Instagram boost charges?')">Instagram charges?</button>
@@ -168,6 +168,73 @@
                         <span class="report-btn-icon">&#128218;</span>
                         <span>Full Financial Report</span>
                     </button>
+                </div>
+            </section>
+
+            <section class="panel" id="architecture-section">
+                <div class="panel-header">
+                    <span class="panel-icon">&#9881;</span>
+                    <h2>How It Works</h2>
+                    <button class="header-btn" style="margin-left:auto;" onclick="toggleArchitecture()" aria-label="Toggle architecture diagram">Show / Hide</button>
+                </div>
+                <div id="architectureDiagram" style="display:none;">
+                    <div class="architecture-flow">
+                        <div class="arch-step">
+                            <div class="arch-icon">&#128179;</div>
+                            <div class="arch-label">PayPal API</div>
+                            <div class="arch-desc">OAuth2 transaction data</div>
+                        </div>
+                        <div class="arch-arrow">&#8594;</div>
+                        <div class="arch-step">
+                            <div class="arch-icon">&#9889;</div>
+                            <div class="arch-label">FastAPI Backend</div>
+                            <div class="arch-desc">Smart alert detection</div>
+                        </div>
+                        <div class="arch-arrow">&#8594;</div>
+                        <div class="arch-step">
+                            <div class="arch-icon">&#129504;</div>
+                            <div class="arch-label">Gemini AI</div>
+                            <div class="arch-desc">Brain + categorisation</div>
+                        </div>
+                        <div class="arch-arrow">&#8594;</div>
+                        <div class="arch-step">
+                            <div class="arch-icon">&#128202;</div>
+                            <div class="arch-label">Dashboard</div>
+                            <div class="arch-desc">Charts, reports, alerts</div>
+                        </div>
+                    </div>
+                    <div class="arch-tech-tags">
+                        <span class="arch-tag">Python</span>
+                        <span class="arch-tag">FastAPI</span>
+                        <span class="arch-tag">PayPal REST API</span>
+                        <span class="arch-tag">Google Gemini</span>
+                        <span class="arch-tag">Chart.js</span>
+                        <span class="arch-tag">jsPDF</span>
+                        <span class="arch-tag">Render</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel" id="compare-section">
+                <div class="panel-header">
+                    <span class="panel-icon">&#128197;</span>
+                    <h2>Month-over-Month Comparison</h2>
+                </div>
+                <div class="compare-grid" id="compareGrid">
+                    <div class="compare-card">
+                        <h4>This Month</h4>
+                        <div class="compare-row"><span>Income</span><span class="amount-positive" id="compareIncomeThis">-</span></div>
+                        <div class="compare-row"><span>Expenses</span><span class="amount-negative" id="compareExpensesThis">-</span></div>
+                        <div class="compare-row compare-net"><span>Net</span><span id="compareNetThis">-</span></div>
+                    </div>
+                    <div class="compare-vs">vs</div>
+                    <div class="compare-card">
+                        <h4>Last Month</h4>
+                        <div class="compare-row"><span>Income</span><span class="amount-positive" id="compareIncomeLast">-</span></div>
+                        <div class="compare-row"><span>Expenses</span><span class="amount-negative" id="compareExpensesLast">-</span></div>
+                        <div class="compare-row compare-net"><span>Net</span><span id="compareNetLast">-</span></div>
+                    </div>
+                    <div class="compare-change" id="compareChange"></div>
                 </div>
             </section>
 
@@ -256,9 +323,13 @@
     </div>
 
     <footer>
-        PayFlow AI -Built for the <a href="https://paypalaihackathon.devpost.com/" target="_blank" rel="noopener">PayPal AI Hackathon 2026</a> |
-        <a href="https://github.com/hardeepsingh-ai/payflow-ai" target="_blank" rel="noopener">GitHub</a> |
-        Powered by PayPal API + Gemini AI
+        <div class="powered-badges">
+            <span class="powered-badge paypal-badge">PayPal API</span>
+            <span class="powered-badge gemini-badge">Gemini AI</span>
+            <span class="powered-badge render-badge">Render</span>
+        </div>
+        PayFlow AI - Built for the <a href="https://paypalaihackathon.devpost.com/" target="_blank" rel="noopener">PayPal AI Hackathon 2026</a> |
+        <a href="https://github.com/hardeepsingh-ai/payflow-ai" target="_blank" rel="noopener">GitHub</a>
     </footer>
 
     <script src="js/app.js"></script>
@@ -277,6 +348,10 @@
     function simulateConnect() {
         closeConnectPayPal();
         showToast('&#9989; <strong>PayPal sandbox connected!</strong> In production, this would redirect to PayPal OAuth to authorize read-only access to your transactions.', 'success');
+    }
+    function toggleArchitecture() {
+        const d = document.getElementById('architectureDiagram');
+        d.style.display = d.style.display === 'none' ? 'block' : 'none';
     }
     </script>
 </body>
