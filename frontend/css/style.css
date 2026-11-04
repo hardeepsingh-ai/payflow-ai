@@ -1363,7 +1363,7 @@ footer a:hover { text-decoration: underline; }
     .brain-suggestions { flex-direction: column; }
     .suggestion { text-align: center; }
     .toast { left: 16px; right: 16px; max-width: none; }
-    .notif-panel { position: fixed; top: auto; bottom: 60px; left: 16px; right: 16px; width: auto; max-width: none; max-height: 50vh; }
+    .notif-panel { position: fixed; top: 70px; bottom: auto; left: 16px; right: 16px; width: auto; max-width: none; max-height: 60vh; }
     .notif-bell-wrap { position: static; }
     .transactions-panel { overflow-x: auto; }
     table { min-width: 0; }
