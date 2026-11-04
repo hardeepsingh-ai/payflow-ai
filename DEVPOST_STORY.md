@@ -60,6 +60,22 @@ My vision is to turn PayFlow AI into a full agentic financial assistant. Not jus
 
 The goal is a financial brain that works as a dedicated team member — someone who has all the knowledge of your company's monetary history, proactively prevents problems, and saves the founder hours every week. Like having a CFO on your team who never sleeps.
 
+## Try It Yourself
+
+**Live Demo:** [payflow-ai.onrender.com](https://payflow-ai.onrender.com)
+
+1. Click **Demo Mode** in the sidebar (no PayPal account needed)
+2. Explore the dashboard — stats, charts, and AI insights load automatically
+3. Go to **PayFlow Brain** and ask: *"If I cancelled every recurring charge over £20, would I be profitable next month?"*
+4. Try the **agentic action buttons** that appear in Brain responses
+5. Download a **Full Financial Report** as PDF from the Reports section
+6. Press `/` anywhere to jump to the Brain input
+7. Toggle dark/light theme with the sun/moon icon
+
+**GitHub:** [github.com/hardeepsingh-ai/payflow-ai](https://github.com/hardeepsingh-ai/payflow-ai)
+
+*Built solo by Hardeep Singh — MSc Marketing, University of Aberdeen*
+
 ## Built With
 
 - python

@@ -1221,6 +1221,113 @@ tr:hover { background: var(--bg-hover); }
     cursor: not-allowed;
 }
 
+/* ── Welcome Screen ── */
+.welcome-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+}
+.welcome-card {
+    text-align: center;
+    max-width: 480px;
+    padding: 48px 32px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    animation: fadeInUp 0.5s ease forwards;
+}
+.welcome-icon { font-size: 48px; margin-bottom: 16px; }
+.welcome-card h2 { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.welcome-card > p { font-size: 14px; color: var(--text-dim); line-height: 1.6; margin-bottom: 24px; }
+.welcome-steps {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 28px;
+}
+.welcome-step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-dim);
+}
+.welcome-num {
+    width: 24px; height: 24px;
+    background: rgba(0, 112, 186, 0.15);
+    color: var(--primary-light);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; flex-shrink: 0;
+}
+.welcome-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.welcome-demo-btn {
+    padding: 12px 24px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.welcome-demo-btn:hover { border-color: var(--primary-light); background: var(--bg-hover); }
+.welcome-actions .paypal-connect-btn { width: auto; padding: 12px 24px; font-size: 14px; }
+
+/* ── Transaction Filters ── */
+.transactions-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.txn-filters { display: flex; gap: 8px; flex-wrap: wrap; }
+.txn-filters input, .txn-filters select {
+    padding: 8px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.txn-filters input { width: 200px; }
+.txn-filters input:focus, .txn-filters select:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 3px var(--glow);
+}
+
+/* ── Page Section Transitions ── */
+section {
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+/* ── Error States ── */
+.error-state {
+    text-align: center;
+    padding: 32px;
+    color: var(--red);
+    font-size: 14px;
+}
+.error-state-icon { font-size: 32px; margin-bottom: 8px; }
+.error-retry-btn {
+    margin-top: 12px;
+    padding: 8px 20px;
+    background: rgba(255, 82, 82, 0.15);
+    border: 1px solid rgba(255, 82, 82, 0.3);
+    color: #ff8a80;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.error-retry-btn:hover { background: rgba(255, 82, 82, 0.25); }
+
 /* ── Footer ── */
 footer {
     text-align: center;

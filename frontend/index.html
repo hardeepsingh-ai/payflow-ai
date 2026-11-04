@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PayFlow AI - Smart Payment Intelligence</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23003087'/><text x='16' y='22' text-anchor='middle' font-family='Arial' font-weight='800' font-size='18' fill='white'>P</text><circle cx='26' cy='6' r='5' fill='%23ffc439'/><text x='26' y='9' text-anchor='middle' font-family='Arial' font-weight='800' font-size='8' fill='%23003087'>AI</text></svg>">
-    <link rel="stylesheet" href="css/style.css?v=2">
+    <link rel="stylesheet" href="css/style.css?v=3">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -61,7 +61,24 @@
                 </div>
             </div>
 
-            <section class="stats-grid">
+            <section class="welcome-screen" id="welcomeScreen">
+                <div class="welcome-card">
+                    <div class="welcome-icon">&#128176;</div>
+                    <h2>Welcome to PayFlow AI</h2>
+                    <p>Your AI-powered payment intelligence dashboard. Connect your PayPal to get started, or try demo mode.</p>
+                    <div class="welcome-steps">
+                        <div class="welcome-step"><span class="welcome-num">1</span><span>Connect PayPal</span></div>
+                        <div class="welcome-step"><span class="welcome-num">2</span><span>AI analyses your data</span></div>
+                        <div class="welcome-step"><span class="welcome-num">3</span><span>Get insights & alerts</span></div>
+                    </div>
+                    <div class="welcome-actions">
+                        <button class="paypal-connect-btn" onclick="showConnectPayPal()" aria-label="Connect your PayPal account"><span class="paypal-logo">PayPal</span> Connect with PayPal</button>
+                        <button class="welcome-demo-btn" onclick="loadDashboard()" aria-label="Try demo mode">Try Demo Mode</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="stats-grid" id="statsGrid">
                 <div class="stat-card balance">
                     <div class="stat-icon">&#128176;</div>
                     <span class="stat-label">Current Balance</span>
@@ -110,6 +127,7 @@
                 <div class="brain-header-row">
                     <h2>&#129504; PayFlow Brain</h2>
                     <div class="brain-header-actions">
+                        <button class="copy-chat-btn" onclick="exportBrainChat()" title="Download chat as text file">&#8595; Export</button>
                         <button class="copy-chat-btn" onclick="copyBrainChat()" title="Copy chat to clipboard">&#128203; Copy</button>
                         <button class="clear-chat-btn" onclick="clearBrainChat()" title="Clear chat history">Clear Chat</button>
                     </div>
@@ -117,7 +135,7 @@
                 <p class="brain-desc">Ask your AI financial assistant anything about your transactions</p>
                 <div class="brain-chat" id="brainChat"></div>
                 <div class="brain-input-row">
-                    <input type="text" id="brainInput" placeholder="e.g. Why is my marketing spend so high?" />
+                    <input type="text" id="brainInput" placeholder="Ask anything... (press / to focus)" aria-label="Ask PayFlow Brain a question" />
                     <button id="brainAsk" onclick="askBrain()" aria-label="Ask PayFlow Brain">Ask</button>
                 </div>
                 <div class="brain-suggestions">
@@ -251,7 +269,15 @@
             </section>
 
             <section class="transactions-panel" id="transactions-section">
-                <h2>Recent Transactions</h2>
+                <div class="transactions-header-row">
+                    <h2>Recent Transactions</h2>
+                    <div class="txn-filters">
+                        <input type="text" id="txnSearch" placeholder="Search transactions..." aria-label="Search transactions" oninput="filterTransactions()" />
+                        <select id="txnCategoryFilter" aria-label="Filter by category" onchange="filterTransactions()">
+                            <option value="">All Categories</option>
+                        </select>
+                    </div>
+                </div>
                 <table id="transactionsTable">
                     <thead>
                         <tr>
@@ -346,8 +372,8 @@
         <a href="https://github.com/hardeepsingh-ai/payflow-ai" target="_blank" rel="noopener">GitHub</a>
     </footer>
 
-    <script src="js/app.js?v=2"></script>
-    <script src="js/reports.js?v=2"></script>
+    <script src="js/app.js?v=3"></script>
+    <script src="js/reports.js?v=3"></script>
     <script>
     function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('open');

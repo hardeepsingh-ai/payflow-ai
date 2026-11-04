@@ -3,101 +3,119 @@
 > **Live Demo:** [payflow-ai.onrender.com](https://payflow-ai.onrender.com)
 > **Hackathon:** [PayPal AI Hackathon 2026](https://paypalaihackathon.devpost.com/)
 
-AI-powered payment intelligence dashboard that connects to PayPal, automatically categorizes transactions, predicts cash flow, and sends smart alerts — helping small businesses make better financial decisions.
+[![Live Demo](https://img.shields.io/badge/Live-Demo-00c853?style=for-the-badge)](https://payflow-ai.onrender.com)
+[![Built for](https://img.shields.io/badge/PayPal-AI%20Hackathon%202026-003087?style=for-the-badge&logo=paypal)](https://paypalaihackathon.devpost.com/)
+[![Python](https://img.shields.io/badge/Python-FastAPI-009688?style=for-the-badge&logo=python)](https://fastapi.tiangolo.com/)
+[![AI](https://img.shields.io/badge/Google-Gemini%20AI-4285F4?style=for-the-badge&logo=google)](https://ai.google.dev/)
 
-**Built from a real problem:** A chiropractic clinic had their bank account frozen after Instagram auto-charged £600 in boost posts through PayPal without anyone noticing. PayFlow AI detects exactly these kinds of charges and warns you before it's too late.
+---
+
+## What is PayFlow AI?
+
+PayFlow AI turns your PayPal account into a **financial brain** for your business. It connects to the PayPal API, analyses every transaction with Google Gemini AI, and gives you smart alerts, natural language Q&A, and professional PDF reports — all in one dashboard.
+
+**The problem it solves:** A chiropractic clinic had Instagram auto-charge £400–600 without anyone knowing. The bank froze their account thinking it was fraud. PayFlow AI is the smart dashboard that would have caught it instantly.
+
+---
 
 ## Features
 
-- **PayPal Integration** — Connects to PayPal REST API to pull real transaction data (sandbox + production ready)
-- **PayFlow Brain** — AI-powered financial assistant (Gemini AI) that answers any question about your money in plain English
-- **AI Categorisation** — Automatically sorts every transaction into categories (Marketing, Software, Utilities, Payroll, etc.)
-- **Smart Alerts** — Detects unusual charges like auto-recurring Instagram boost posts and warns you immediately
-- **Cash Flow Forecast** — AI-generated 30-day balance prediction based on spending trends
-- **PDF Reports** — Download financial reports (Transactions, Categories, Income vs Expenses, AI Insights, Brain Chat, Full Report) with date range filtering
-- **Interactive Charts** — Spending by Category (doughnut) and Income vs Expenses (bar) with Chart.js
-- **Chat Persistence** — Brain conversation history survives page refreshes via localStorage
+### PayFlow Brain (AI Financial Assistant)
+Ask any question about your money in plain English. The Brain analyses your actual transaction data with step-by-step calculations and gives personalised answers — not generic ones.
+
+- *"If I cancelled every recurring charge over £20, would I be profitable?"*
+- *"What percentage of income goes to marketing?"*
+- *"Rank my expenses by how essential they are to keeping the clinic open"*
+
+### Agentic Actions
+The Brain offers action buttons in context. Spot a suspicious charge? Click "Pause this recurring charge" or "Set up alert" right in the chat.
+
+### Smart Alerts + Notification Bell
+Automatically detects unusual patterns (auto-recurring Instagram boosts, high marketing ratios). All alerts stored in a notification bell with badge count, dropdown panel, and individual dismiss.
+
+### Interactive Charts
+- Spending by Category (doughnut) + Income vs Expenses (bar chart)
+- Month-over-Month Comparison with percentage change indicators
+
+### PDF Reports (6 types)
+Transactions | Spending by Category | Income vs Expenses | AI Insights | Brain Chat History | Full Financial Report (branded cover page). All with date range filtering.
+
+### Transaction Search & Filter
+Search by name and filter by category across all transactions.
+
+### More
+- Dark/Light theme toggle with localStorage persistence
+- Keyboard shortcuts (`/` to focus Brain, `Esc` to close modals)
+- Export Brain chat as text file
+- Welcome onboarding screen for first-time users
+- Architecture diagram showing the full data flow
+- Mobile responsive with hamburger menu
+
+---
+
+## Architecture
+
+```
+PayPal API  -->  FastAPI Backend  -->  Gemini AI  -->  Dashboard
+(OAuth2)        (Smart alerts)       (Brain + AI)     (Charts, Reports, Alerts)
+```
+
+---
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| **Backend** | Python, FastAPI |
-| **PayPal** | REST API v1 (OAuth2, Sandbox) |
-| **AI** | Google Gemini 3.5 Flash Lite (REST API) |
-| **Frontend** | HTML, CSS, JavaScript |
-| **Charts** | Chart.js |
-| **PDF Generation** | jsPDF + autoTable |
-| **Deployment** | Render (full-stack, single service) |
+| Backend | Python, FastAPI |
+| PayPal | REST API v1, OAuth2 |
+| AI | Google Gemini 3.5 Flash Lite (REST) |
+| Frontend | HTML, CSS, JavaScript |
+| Charts | Chart.js |
+| PDF | jsPDF + autoTable |
+| Deploy | Render (single service) |
+
+---
 
 ## Quick Start
 
-### 1. Clone the repo
 ```bash
 git clone https://github.com/hardeepsingh-ai/payflow-ai.git
 cd payflow-ai
-```
-
-### 2. Set up environment
-```bash
-cd backend
-python3 -m venv venv
-source venv/bin/activate
 pip install -r requirements.txt
-```
 
-### 3. Configure environment variables
-```bash
-cp ../.env.example .env
-# Edit .env with your PayPal sandbox credentials and Gemini API key
-```
-
-### 4. Run the server
-```bash
+# Set environment variables (see .env.example)
+cd backend
 uvicorn main:app --reload --port 8000
 ```
 
-### 5. Open the dashboard
-Visit `http://localhost:8000` in your browser.
+Open `http://localhost:8000`. Click **Demo Mode** to try without PayPal credentials.
 
-The app runs in **demo mode** by default with realistic sample data for Aberdeen Chiropractic Clinic. Set `USE_DEMO=false` in `.env` to connect to a real PayPal sandbox account.
-
-## API Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/dashboard` | GET | Full dashboard data with transactions, categories, and AI insights |
-| `/api/transactions` | GET | Transaction list with AI categorisation |
-| `/api/brain` | POST | Ask PayFlow Brain any financial question (`{"question": "..."}`) |
-| `/api/health` | GET | Health check and mode status |
-
-## Architecture
-
-```
-PayPal API ──→ FastAPI Backend ──→ Gemini AI (Brain)
-                    │
-                    ├── Transaction categorisation
-                    ├── Smart alert detection
-                    ├── Cash flow forecast
-                    └── Static frontend serving
-                              │
-                              ├── Dashboard + Charts
-                              ├── PayFlow Brain chat
-                              └── PDF Report generator
-```
-
-## Environment Variables
+### Environment Variables
 
 | Variable | Description |
 |----------|-------------|
 | `PAYPAL_CLIENT_ID` | PayPal sandbox client ID |
 | `PAYPAL_CLIENT_SECRET` | PayPal sandbox secret |
-| `GEMINI_API_KEY` | Google Gemini API key (free tier) |
-| `USE_DEMO` | `true` for demo data, `false` for real PayPal (default: `true`) |
+| `GEMINI_API_KEY` | Google Gemini API key |
 
-## Built For
+---
 
-[PayPal AI Hackathon 2026](https://paypalaihackathon.devpost.com/) — $69,750 in total prizes
+## Deployment
+
+Single service on Render — FastAPI serves both the API and static frontend.
+
+- **Build:** `pip install -r requirements.txt`
+- **Start:** `cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT`
+
+---
+
+## Author
+
+**Hardeep Singh** — MSc Marketing (Distinction), University of Aberdeen
+
+Built solo for the PayPal AI Hackathon 2026.
+
+---
 
 ## License
 

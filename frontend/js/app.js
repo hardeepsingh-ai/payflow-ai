@@ -116,11 +116,17 @@ function removeSkeletons() {
     });
 }
 
+let _allTransactions = [];
+
 async function loadDashboard() {
+    const welcome = document.getElementById('welcomeScreen');
+    if (welcome) welcome.style.display = 'none';
+
     showSkeletons();
 
     try {
         const resp = await fetch(`${API_URL}/api/dashboard`);
+        if (!resp.ok) throw new Error(`Server error: ${resp.status}`);
         const data = await resp.json();
 
         removeSkeletons();
@@ -147,10 +153,12 @@ async function loadDashboard() {
         document.getElementById('savingTip').innerHTML = insights.top_saving
             ? `&#128161; <strong>Tip:</strong> ${insights.top_saving}` : '';
 
+        _allTransactions = data.transactions || [];
         renderCategoryChart(data.categories);
         renderFlowChart(data.transactions);
         renderTransactions(data.transactions);
         renderCompareMonths(data.transactions);
+        populateCategoryFilter(data.transactions);
 
         if (alerts.length > 0) {
             setTimeout(() => {
@@ -159,8 +167,26 @@ async function loadDashboard() {
         }
     } catch (err) {
         removeSkeletons();
-        document.getElementById('insightSummary').textContent = 'Unable to connect to API. Start the backend server first.';
+        document.getElementById('insightSummary').innerHTML = `<div class="error-state"><div class="error-state-icon">&#9888;</div>Unable to load data. The server may be starting up (free tier takes ~30s).<br><button class="error-retry-btn" onclick="loadDashboard()">Retry</button></div>`;
     }
+}
+
+function populateCategoryFilter(transactions) {
+    const cats = [...new Set(transactions.map(t => t.ai_category || 'Other'))].sort();
+    const sel = document.getElementById('txnCategoryFilter');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">All Categories</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+}
+
+function filterTransactions() {
+    const search = (document.getElementById('txnSearch')?.value || '').toLowerCase();
+    const cat = document.getElementById('txnCategoryFilter')?.value || '';
+    const filtered = _allTransactions.filter(t => {
+        const matchSearch = !search || t.name.toLowerCase().includes(search) || (t.ai_category || '').toLowerCase().includes(search);
+        const matchCat = !cat || (t.ai_category || 'Other') === cat;
+        return matchSearch && matchCat;
+    });
+    renderTransactions(filtered);
 }
 
 function renderCategoryChart(categories) {
@@ -323,7 +349,7 @@ async function askBrain() {
         chat.innerHTML += `<div class="brain-msg bot">${rendered}${actionHtml}</div>`;
     } catch {
         thinking.remove();
-        chat.innerHTML += `<div class="brain-msg bot">Sorry, I couldn't process that. Try again.</div>`;
+        chat.innerHTML += `<div class="brain-msg bot">&#9888; I couldn't reach the AI server. This may be due to a cold start on the free tier — please wait 30 seconds and try again.<br><button class="error-retry-btn" onclick="document.getElementById('brainInput').value='${question.replace(/'/g, "\\'")}';askBrain()">Retry</button></div>`;
     }
     askBtn.disabled = false;
     askBtn.innerHTML = 'Ask';
@@ -371,6 +397,23 @@ function copyBrainChat() {
     });
 }
 
+function exportBrainChat() {
+    const msgs = [];
+    document.querySelectorAll('#brainChat .brain-msg').forEach(m => {
+        const role = m.classList.contains('user') ? 'You' : 'PayFlow Brain';
+        msgs.push(`${role}:\n${m.textContent}\n`);
+    });
+    if (msgs.length === 0) { showToast('No chat to export.', 'warning'); return; }
+    const text = `PayFlow AI - Brain Chat Export\nDate: ${new Date().toLocaleDateString('en-GB')}\n${'='.repeat(40)}\n\n${msgs.join('\n')}`;
+    const blob = new Blob([text], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `payflow-brain-chat-${new Date().toISOString().split('T')[0]}.txt`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    showToast('&#9989; Chat exported!', 'success');
+}
+
 function askPreset(q) {
     document.getElementById('brainInput').value = q;
     askBrain();
@@ -415,7 +458,21 @@ function loadTheme() {
 
 document.getElementById('brainInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') askBrain();
-    if (e.key === 'Escape') { e.target.value = ''; }
+    if (e.key === 'Escape') { e.target.value = ''; e.target.blur(); }
+});
+
+document.addEventListener('keydown', e => {
+    if (e.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) {
+        e.preventDefault();
+        const input = document.getElementById('brainInput');
+        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => input.focus(), 300);
+    }
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
+        const notifPanel = document.getElementById('notifPanel');
+        if (notifPanel) notifPanel.style.display = 'none';
+    }
 });
 
 loadTheme();
@@ -477,4 +534,5 @@ window.addEventListener('scroll', () => {
     if (btn) btn.classList.toggle('visible', window.scrollY > 400);
 });
 
+// Auto-load dashboard (welcome screen hides once data loads)
 loadDashboard();
