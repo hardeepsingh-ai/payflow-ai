@@ -87,3 +87,4 @@ The goal is a financial brain that works as a dedicated team member — someone 
 - chart-js
 - jspdf
 - render
+- httpx
