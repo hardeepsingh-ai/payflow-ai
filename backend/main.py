@@ -164,7 +164,7 @@ async def ask_brain(query: BrainQuery):
     last_error = None
     for attempt in range(3):
         try:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key={gemini_key}"
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key={gemini_key}"
             payload = {
                 "contents": [{"parts": [{"text": f"{system_prompt}\n\nContext: {context}\n\nQuestion: {query.question}"}]}],
                 "generationConfig": {"maxOutputTokens": 2000, "temperature": 0.2}
