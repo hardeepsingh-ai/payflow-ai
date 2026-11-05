@@ -127,6 +127,7 @@ _last_transactions = []
 
 @app.post("/api/brain")
 async def ask_brain(query: BrainQuery):
+    import httpx
     txns = _last_transactions or generate_demo_transactions(30)
     total_income = sum(t["amount"] for t in txns if t["amount"] > 0)
     total_expenses = sum(abs(t["amount"]) for t in txns if t["amount"] < 0)
@@ -144,106 +145,44 @@ async def ask_brain(query: BrainQuery):
 
     system_prompt = (
         "You are PayFlow Brain, an AI financial assistant for Aberdeen Chiropractic Clinic's PayPal account. "
-        "Rules: 1) Always show your calculations step-by-step. 2) For hypothetical/scenario questions, identify the relevant transactions, "
-        "calculate the numbers, then give a clear YES/NO verdict with the final figure. 3) Use £ for currency. "
-        "4) If a question has multiple conditions, address each one explicitly. 5) End with a concrete recommendation. "
-        "6) Flag unexpected auto-charges like Instagram Boost Posts."
+        "You MUST follow these rules in every response:\n"
+        "1) Start with a brief greeting identifying yourself.\n"
+        "2) ALWAYS show detailed step-by-step calculations with numbered steps.\n"
+        "3) For hypothetical/scenario questions: list every relevant transaction by name and amount, "
+        "sum them, show before vs after, then give a clear YES/NO verdict with the final figure.\n"
+        "4) Use £ for all currency values.\n"
+        "5) If a question has multiple conditions, create a separate numbered section for each.\n"
+        "6) End with a concrete, actionable recommendation.\n"
+        "7) Flag any unexpected auto-charges like Instagram Boost Posts.\n"
+        "8) Your response must be at least 200 words with full calculations shown."
     )
 
     gemini_key = os.getenv("GEMINI_API_KEY")
-    if gemini_key:
+    if not gemini_key:
+        return {"answer": "PayFlow Brain requires the Gemini AI engine. Please configure the API key to enable intelligent financial analysis."}
+
+    last_error = None
+    for attempt in range(3):
         try:
-            import httpx
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key={gemini_key}"
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key={gemini_key}"
             payload = {
                 "contents": [{"parts": [{"text": f"{system_prompt}\n\nContext: {context}\n\nQuestion: {query.question}"}]}],
-                "generationConfig": {"maxOutputTokens": 2000, "temperature": 0.3}
+                "generationConfig": {"maxOutputTokens": 2000, "temperature": 0.2}
             }
-            resp = httpx.post(url, json=payload, timeout=30)
+            async with httpx.AsyncClient() as client:
+                resp = await client.post(url, json=payload, timeout=30)
             data = resp.json()
+            if "error" in data:
+                last_error = f"Gemini API error: {data['error'].get('message', str(data['error']))}"
+                print(f"Attempt {attempt+1}: {last_error}")
+                continue
             answer = data["candidates"][0]["content"]["parts"][0]["text"]
             return {"answer": answer}
         except Exception as e:
-            print(f"Gemini API error: {e}")
-            pass
-    else:
-        pass
-    if os.getenv("ANTHROPIC_API_KEY"):
-        import anthropic
-        client = anthropic.Anthropic()
-        msg = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=300,
-            system=system_prompt,
-            messages=[{"role": "user", "content": f"Context: {context}\n\nQuestion: {query.question}"}],
-        )
-        answer = msg.content[0].text
-    else:
-        q = query.question.lower()
-        top_cats = sorted(categories.items(), key=lambda x: x[1], reverse=True)
-        expense_cats = {k: v for k, v in top_cats if not k.startswith("Revenue")}
-        income_cats = {k: v for k, v in top_cats if k.startswith("Revenue")}
-        boost_txns = [t for t in txns if "boost post" in t["name"].lower()]
-        boost_total = sum(abs(t["amount"]) for t in boost_txns)
-        highest = sorted(txns, key=lambda t: abs(t["amount"]), reverse=True)[:5]
-        recent = txns[:5]
+            last_error = str(e)
+            print(f"Attempt {attempt+1} failed: {e}")
 
-        if "boost" in q or "instagram" in q:
-            answer = f"I found {len(boost_txns)} Instagram Boost Post charges totalling £{boost_total:,.2f}. These appear to be auto-charged from a connected Instagram account. I'd recommend disconnecting PayPal from Instagram's boost feature to prevent further unexpected charges."
-        elif "highest" in q or "biggest" in q or "largest" in q or "top" in q:
-            lines = [f"  • {t['name']}: £{abs(t['amount']):,.2f}" for t in highest]
-            answer = f"Your highest transactions:\n" + "\n".join(lines)
-        elif "recent" in q or "latest" in q or "last" in q:
-            lines = [f"  • {t['name']}: £{t['amount']:+,.2f} ({t.get('ai_category', 'Other')})" for t in recent]
-            answer = f"Most recent transactions:\n" + "\n".join(lines)
-        elif "spend" in q or "expense" in q or "cost" in q or "paid" in q or "paying" in q:
-            top3 = list(expense_cats.items())[:3]
-            answer = f"Your top spending categories: {', '.join(f'{c}: £{v:,.2f}' for c, v in top3)}. Total expenses: £{total_expenses:,.2f}."
-        elif "income" in q or "revenue" in q or "earn" in q or "payment" in q or "money coming" in q:
-            lines = [f"  • {c}: £{v:,.2f}" for c, v in income_cats.items()]
-            answer = f"Total income: £{total_income:,.2f}. Breakdown:\n" + "\n".join(lines) if lines else f"Total income: £{total_income:,.2f}."
-        elif "marketing" in q or "ads" in q or "meta" in q or "facebook" in q:
-            m = categories.get("Marketing & Advertising", 0)
-            pct = (m / total_expenses * 100) if total_expenses else 0
-            answer = f"Marketing & Advertising: £{m:,.2f} ({pct:.0f}% of expenses). This includes {len(boost_txns)} auto-charged Instagram Boost Posts (£{boost_total:,.2f}). Review these -they may be unauthorised."
-        elif "rent" in q or "utilit" in q or "bill" in q:
-            r = categories.get("Rent & Utilities", 0)
-            answer = f"Rent & Utilities: £{r:,.2f}. This covers clinic rent, electricity, and business insurance."
-        elif "staff" in q or "payroll" in q or "employee" in q or "receptionist" in q:
-            s = categories.get("Staff & Payroll", 0)
-            answer = f"Staff & Payroll: £{s:,.2f}. This covers receptionist pay and cleaning services."
-        elif "suppli" in q or "inventory" in q:
-            c = categories.get("Clinic Supplies", 0)
-            answer = f"Clinic Supplies: £{c:,.2f}. Includes treatment table covers, massage oils, resistance bands, and KT tape."
-        elif "software" in q or "subscription" in q or "cliniko" in q:
-            sw = categories.get("Software & Subscriptions", 0)
-            answer = f"Software & Subscriptions: £{sw:,.2f}. Includes Cliniko (practice management), online booking system, and Canva Pro."
-        elif "save" in q or "saving" in q or "cut" in q or "reduce" in q:
-            answer = f"Top saving opportunities: 1) Review {len(boost_txns)} Instagram auto-charges (£{boost_total:,.2f}) -these may be unauthorised. 2) Compare clinic supply vendors for better rates. 3) Your marketing is {categories.get('Marketing & Advertising', 0) / total_expenses * 100:.0f}% of spend -audit ROI per channel."
-        elif "profit" in q or "net" in q or "cash flow" in q or "balance" in q:
-            net = total_income - total_expenses
-            status = "positive" if net >= 0 else "negative"
-            answer = f"Net cash flow: £{net:,.2f} ({status}). Income: £{total_income:,.2f}, Expenses: £{total_expenses:,.2f}. {'Your expenses exceed income -review discretionary spending.' if net < 0 else 'Healthy position -consider setting aside reserves.'}"
-        elif "categor" in q or "breakdown" in q or "summary" in q or "overview" in q:
-            lines = [f"  • {c}: £{v:,.2f}" for c, v in top_cats]
-            answer = f"Full category breakdown:\n" + "\n".join(lines)
-        elif "alert" in q or "warning" in q or "problem" in q or "issue" in q or "wrong" in q:
-            alerts = []
-            if boost_total > 0:
-                alerts.append(f"{len(boost_txns)} Instagram auto-charges totalling £{boost_total:,.2f}")
-            if total_expenses > total_income:
-                alerts.append(f"Expenses (£{total_expenses:,.2f}) exceed income (£{total_income:,.2f})")
-            mkt = categories.get("Marketing & Advertising", 0)
-            if mkt > total_expenses * 0.2:
-                alerts.append(f"Marketing is {mkt/total_expenses*100:.0f}% of expenses")
-            answer = "Alerts:\n" + "\n".join(f"  ⚠️ {a}" for a in alerts) if alerts else "No critical alerts right now. Your account looks healthy."
-        elif "help" in q or "what can" in q or "how" in q:
-            answer = "I can help with: transaction analysis, spending breakdowns, income reports, alerts & warnings, category summaries, saving tips, cash flow forecasts, and marketing spend analysis. Just ask!"
-        else:
-            net = total_income - total_expenses
-            answer = f"Here's your overview: Income £{total_income:,.2f}, Expenses £{total_expenses:,.2f}, Net £{net:,.2f}. Top expense: {list(expense_cats.keys())[0] if expense_cats else 'N/A'} (£{list(expense_cats.values())[0] if expense_cats else 0:,.2f}). {len(boost_txns)} Instagram auto-charges found (£{boost_total:,.2f}). Ask me about any category, alerts, savings, or specific transactions!"
-
-    return {"answer": answer}
+    return {"answer": f"I'm having trouble connecting to the AI engine right now. Please try again in a moment. (Error: {last_error})"}
 
 
 @app.get("/api/health")
