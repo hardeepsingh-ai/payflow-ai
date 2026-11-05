@@ -28,7 +28,7 @@ USE_DEMO = not os.getenv("PAYPAL_CLIENT_ID") or os.getenv("USE_DEMO", "true").lo
 @app.get("/api/transactions")
 async def get_transactions():
     if USE_DEMO:
-        transactions = generate_demo_transactions(30)
+        transactions = _get_transactions()
     else:
         raw = await paypal.get_transactions()
         transactions = []
@@ -53,7 +53,7 @@ async def get_transactions():
 @app.get("/api/dashboard")
 async def get_dashboard():
     if USE_DEMO:
-        transactions = generate_demo_transactions(30)
+        transactions = _get_transactions()
         balance = get_demo_balance()
     else:
         raw = await paypal.get_transactions()
@@ -122,13 +122,20 @@ class BrainQuery(BaseModel):
     question: str
 
 
-_last_transactions = []
+_cached_transactions = None
+
+
+def _get_transactions():
+    global _cached_transactions
+    if _cached_transactions is None:
+        _cached_transactions = generate_demo_transactions(30)
+    return _cached_transactions
 
 
 @app.post("/api/brain")
 async def ask_brain(query: BrainQuery):
     import httpx
-    txns = _last_transactions or generate_demo_transactions(30)
+    txns = _get_transactions()
     total_income = sum(t["amount"] for t in txns if t["amount"] > 0)
     total_expenses = sum(abs(t["amount"]) for t in txns if t["amount"] < 0)
     categories = {}
@@ -136,11 +143,21 @@ async def ask_brain(query: BrainQuery):
         cat = t.get("ai_category", "Other")
         categories[cat] = round(categories.get(cat, 0) + abs(t["amount"]), 2)
 
+    top5 = sorted(txns, key=lambda t: abs(t["amount"]), reverse=True)[:10]
+    top5_str = "; ".join(f"{t['name']} £{t['amount']:+.2f} ({t.get('ai_category','Other')})" for t in top5)
+    auto_charges = [t for t in txns if "boost" in t["name"].lower() or "auto" in t["name"].lower()]
+    auto_str = "; ".join(f"{t['name']} £{t['amount']:.2f}" for t in auto_charges) if auto_charges else "None"
+    recurring = [t for t in txns if abs(t["amount"]) > 20 and t["amount"] < 0]
+    recurring_str = "; ".join(f"{t['name']} £{t['amount']:.2f} ({t.get('ai_category','Other')})" for t in recurring)
+
     context = (
-        f"Financial data: Income £{total_income:,.2f}, Expenses £{total_expenses:,.2f}, "
+        f"Financial summary: Income £{total_income:,.2f}, Expenses £{total_expenses:,.2f}, "
         f"Net £{total_income - total_expenses:,.2f}. "
         f"Categories: {categories}. "
-        f"All transactions: {[{'name': t['name'], 'amount': t['amount'], 'category': t.get('ai_category', 'Other')} for t in txns]}"
+        f"Top 10 transactions by size: {top5_str}. "
+        f"Auto/recurring charges flagged: {auto_str}. "
+        f"All recurring charges over £20: {recurring_str}. "
+        f"Total transactions: {len(txns)}."
     )
 
     system_prompt = (
