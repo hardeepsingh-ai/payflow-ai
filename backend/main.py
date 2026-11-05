@@ -154,7 +154,8 @@ async def ask_brain(query: BrainQuery):
         "5) If a question has multiple conditions, create a separate numbered section for each.\n"
         "6) End with a concrete, actionable recommendation.\n"
         "7) Flag any unexpected auto-charges like Instagram Boost Posts.\n"
-        "8) Your response must be at least 200 words with full calculations shown."
+        "8) Keep your response focused and complete — group similar transactions together instead of listing every single one individually.\n"
+        "9) CRITICAL: Always finish your response with a final verdict and recommendation. Never leave a response incomplete."
     )
 
     gemini_key = os.getenv("GEMINI_API_KEY")
@@ -167,7 +168,7 @@ async def ask_brain(query: BrainQuery):
             url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key={gemini_key}"
             payload = {
                 "contents": [{"parts": [{"text": f"{system_prompt}\n\nContext: {context}\n\nQuestion: {query.question}"}]}],
-                "generationConfig": {"maxOutputTokens": 2000, "temperature": 0.2}
+                "generationConfig": {"maxOutputTokens": 4096, "temperature": 0.2}
             }
             async with httpx.AsyncClient() as client:
                 resp = await client.post(url, json=payload, timeout=30)
