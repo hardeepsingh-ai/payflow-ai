@@ -11,13 +11,28 @@ function formatDate(dateStr) {
 }
 
 function renderMarkdown(text) {
-    return text
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.+?)\*/g, '<em>$1</em>')
-        .replace(/^[\s]*[-•]\s+(.+)/gm, '<li>$1</li>')
-        .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
-        .replace(/<\/ul>\s*<ul>/g, '')
-        .replace(/\n/g, '<br>');
+    const lines = text.split('\n');
+    let html = '';
+    let inList = false;
+    for (const line of lines) {
+        const trimmed = line.trim();
+        const listMatch = trimmed.match(/^[-•*]\s+(.+)/);
+        if (listMatch) {
+            if (!inList) { html += '<ul>'; inList = true; }
+            html += '<li>' + listMatch[1].replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*(.+?)\*/g, '<em>$1</em>') + '</li>';
+        } else {
+            if (inList) { html += '</ul>'; inList = false; }
+            let processed = trimmed
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.+?)\*/g, '<em>$1</em>');
+            if (trimmed.match(/^#{1,3}\s+/)) {
+                processed = '<strong>' + trimmed.replace(/^#{1,3}\s+/, '') + '</strong>';
+            }
+            html += processed + '<br>';
+        }
+    }
+    if (inList) html += '</ul>';
+    return html;
 }
 
 function animateValue(el, target, prefix = '£') {
@@ -329,7 +344,7 @@ async function askBrain() {
     askBtn.innerHTML = '<span class="dot-pulse"></span> Thinking...';
 
     const chat = document.getElementById('brainChat');
-    chat.innerHTML += `<div class="brain-msg user">${question}</div>`;
+    chat.insertAdjacentHTML('beforeend', `<div class="brain-msg user">${question}</div>`);
     input.value = '';
 
     const thinking = document.createElement('div');
@@ -348,10 +363,10 @@ async function askBrain() {
         thinking.remove();
         const rendered = renderMarkdown(data.answer);
         const actionHtml = detectAgenticAction(data.answer);
-        chat.innerHTML += `<div class="brain-msg bot">${rendered}${actionHtml}</div>`;
+        chat.insertAdjacentHTML('beforeend', `<div class="brain-msg bot">${rendered}${actionHtml}</div>`);
     } catch {
         thinking.remove();
-        chat.innerHTML += `<div class="brain-msg bot">&#9888; I couldn't reach the AI server. This may be due to a cold start on the free tier — please wait 30 seconds and try again.<br><button class="error-retry-btn" onclick="document.getElementById('brainInput').value='${question.replace(/'/g, "\\'")}';askBrain()">Retry</button></div>`;
+        chat.insertAdjacentHTML('beforeend', `<div class="brain-msg bot">&#9888; I couldn't reach the AI server. This may be due to a cold start on the free tier — please wait 30 seconds and try again.<br><button class="error-retry-btn" onclick="document.getElementById('brainInput').value='${question.replace(/'/g, "\\'")}';askBrain()">Retry</button></div>`);
     }
     askBtn.disabled = false;
     askBtn.innerHTML = 'Ask';
