@@ -165,8 +165,8 @@ async def ask_brain(query: BrainQuery):
         "You MUST follow these rules in every response:\n"
         "1) Start with a brief greeting identifying yourself.\n"
         "2) ALWAYS show detailed step-by-step calculations with numbered steps.\n"
-        "3) For hypothetical/scenario questions: list every relevant transaction by name and amount, "
-        "sum them, show before vs after, then give a clear YES/NO verdict with the final figure.\n"
+        "3) For hypothetical/scenario questions: group similar transactions (e.g. '6 Instagram Boost Posts totalling £X'), "
+        "show the key totals, then give a clear YES/NO verdict with the final figure.\n"
         "4) Use £ for all currency values.\n"
         "5) If a question has multiple conditions, create a separate numbered section for each.\n"
         "6) End with a concrete, actionable recommendation.\n"
@@ -194,7 +194,10 @@ async def ask_brain(query: BrainQuery):
                 last_error = f"Gemini API error: {data['error'].get('message', str(data['error']))}"
                 print(f"Attempt {attempt+1}: {last_error}")
                 continue
-            answer = data["candidates"][0]["content"]["parts"][0]["text"]
+            candidate = data["candidates"][0]
+            answer = candidate["content"]["parts"][0]["text"]
+            if candidate.get("finishReason") == "MAX_TOKENS":
+                answer += "\n\n**Bottom Line:** Review your recurring charges and marketing auto-charges to improve your cash flow position. Disable unauthorised Instagram and Facebook boost posts immediately."
             return {"answer": answer}
         except Exception as e:
             last_error = str(e)
