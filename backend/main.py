@@ -157,13 +157,14 @@ async def ask_brain(query: BrainQuery):
             url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key={gemini_key}"
             payload = {
                 "contents": [{"parts": [{"text": f"{system_prompt}\n\nContext: {context}\n\nQuestion: {query.question}"}]}],
-                "generationConfig": {"maxOutputTokens": 1000, "temperature": 0.7}
+                "generationConfig": {"maxOutputTokens": 2000, "temperature": 0.3}
             }
-            resp = httpx.post(url, json=payload, timeout=15)
+            resp = httpx.post(url, json=payload, timeout=30)
             data = resp.json()
             answer = data["candidates"][0]["content"]["parts"][0]["text"]
             return {"answer": answer}
-        except Exception:
+        except Exception as e:
+            print(f"Gemini API error: {e}")
             pass
     else:
         pass
