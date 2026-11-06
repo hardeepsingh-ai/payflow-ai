@@ -227,9 +227,11 @@ function renderCategoryChart(categories) {
             labels: expenseCategories.map(([c]) => c),
             datasets: [{
                 data: expenseCategories.map(([, v]) => v),
-                backgroundColor: colors.slice(0, expenseCategories.length),
-                borderWidth: _a11yPatterns ? 3 : 0,
-                borderColor: _a11yPatterns ? '#ffffff' : undefined,
+                backgroundColor: _a11yPatterns
+                    ? colors.slice(0, expenseCategories.length).map((col, i) => createPattern(col, PATTERN_TYPES[i % PATTERN_TYPES.length]))
+                    : colors.slice(0, expenseCategories.length),
+                borderWidth: _a11yPatterns ? 3 : 1,
+                borderColor: _a11yPatterns ? '#ffffff' : 'rgba(0,0,0,0.1)',
                 hoverBorderWidth: 2,
                 hoverBorderColor: '#fff',
             }]
@@ -309,20 +311,18 @@ function renderFlowChart(transactions) {
                 {
                     label: 'Income',
                     data: sorted.map(([, v]) => v.income),
-                    backgroundColor: incomeColor,
+                    backgroundColor: _a11yPatterns ? createPattern(isCB ? 'rgba(0,114,178,0.85)' : 'rgba(0,200,83,0.85)', 'diagonal') : incomeColor,
                     borderColor: incomeBorder,
                     borderWidth: _a11yPatterns ? 2 : 0,
                     borderRadius: 4,
-                    borderDash: _a11yPatterns ? [] : undefined,
                 },
                 {
                     label: 'Expenses',
                     data: sorted.map(([, v]) => v.expenses),
-                    backgroundColor: expenseColor,
+                    backgroundColor: _a11yPatterns ? createPattern(isCB ? 'rgba(213,94,0,0.85)' : 'rgba(255,82,82,0.85)', 'dots') : expenseColor,
                     borderColor: expenseBorder,
                     borderWidth: _a11yPatterns ? 2 : 0,
                     borderRadius: 4,
-                    borderDash: _a11yPatterns ? [4, 4] : undefined,
                 }
             ]
         },
@@ -637,6 +637,52 @@ function toggleSimplifiedView() {
 
 let _a11yPatterns = false;
 let _a11yDataLabels = false;
+
+function createPattern(color, type) {
+    const c = document.createElement('canvas');
+    c.width = 12; c.height = 12;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, 12, 12);
+    ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+    ctx.lineWidth = 1.5;
+    switch(type) {
+        case 'diagonal':
+            ctx.beginPath(); ctx.moveTo(0,12); ctx.lineTo(12,0); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(-4,4); ctx.lineTo(4,-4); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(8,16); ctx.lineTo(16,8); ctx.stroke();
+            break;
+        case 'dots':
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.beginPath(); ctx.arc(3,3,1.5,0,Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(9,9,1.5,0,Math.PI*2); ctx.fill();
+            break;
+        case 'cross':
+            ctx.beginPath(); ctx.moveTo(0,6); ctx.lineTo(12,6); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(6,0); ctx.lineTo(6,12); ctx.stroke();
+            break;
+        case 'horizontal':
+            ctx.beginPath(); ctx.moveTo(0,3); ctx.lineTo(12,3); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0,9); ctx.lineTo(12,9); ctx.stroke();
+            break;
+        case 'vertical':
+            ctx.beginPath(); ctx.moveTo(3,0); ctx.lineTo(3,12); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(9,0); ctx.lineTo(9,12); ctx.stroke();
+            break;
+        case 'zigzag':
+            ctx.beginPath(); ctx.moveTo(0,6); ctx.lineTo(3,2); ctx.lineTo(6,6); ctx.lineTo(9,2); ctx.lineTo(12,6); ctx.stroke();
+            break;
+        case 'diamond':
+            ctx.beginPath(); ctx.moveTo(6,0); ctx.lineTo(12,6); ctx.lineTo(6,12); ctx.lineTo(0,6); ctx.closePath(); ctx.stroke();
+            break;
+        default:
+            ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(12,12); ctx.stroke();
+            break;
+    }
+    return ctx.createPattern(c, 'repeat');
+}
+
+const PATTERN_TYPES = ['diagonal','dots','cross','horizontal','vertical','zigzag','diamond','diagonal'];
 let _categoryChartInstance = null;
 let _flowChartInstance = null;
 
