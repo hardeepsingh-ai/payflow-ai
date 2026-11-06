@@ -1452,12 +1452,50 @@ footer a:hover { text-decoration: underline; }
 .hc-mode .brain-msg.bot { color: #ffffff; border-width: 2px; }
 
 /* ── Font sizes ── */
-.font-small { font-size: 13px; }
-.font-medium { font-size: 16px; }
-.font-large { font-size: 19px; }
-.font-large .stat-value { font-size: 28px; }
-.font-large .brain-msg, .font-large td, .font-large th { font-size: 15px; }
-.font-small .stat-value { font-size: 18px; }
+.font-small { font-size: 12px; }
+.font-medium { font-size: 15px; }
+.font-large { font-size: 18px; }
+
+.font-small *, .font-medium *, .font-large * {
+    font-size: inherit;
+}
+
+.font-small h1, .font-small .page-title { font-size: 1.5em !important; }
+.font-small h2, .font-small .panel-header h2 { font-size: 1.25em !important; }
+.font-small h3 { font-size: 1.1em !important; }
+.font-small .stat-value { font-size: 1.4em !important; }
+.font-small .stat-label { font-size: 0.7em !important; }
+.font-small .sidebar-nav a { font-size: 0.9em !important; }
+.font-small .category-badge { font-size: 0.7em !important; }
+.font-small .notif-item { font-size: 0.9em !important; }
+.font-small .btn, .font-small button { font-size: 0.85em !important; }
+.font-small .brain-msg { font-size: 0.9em !important; }
+.font-small .powered-badge { font-size: 0.7em !important; }
+.font-small .tech-tag { font-size: 0.7em !important; }
+.font-small .arch-label { font-size: 0.75em !important; }
+.font-small .sidebar-logo h1 { font-size: 1.2em !important; }
+
+.font-large h1, .font-large .page-title { font-size: 2em !important; }
+.font-large h2, .font-large .panel-header h2 { font-size: 1.6em !important; }
+.font-large h3 { font-size: 1.35em !important; }
+.font-large .stat-value { font-size: 1.8em !important; }
+.font-large .stat-label { font-size: 0.85em !important; }
+.font-large .sidebar-nav a { font-size: 1.15em !important; }
+.font-large .category-badge { font-size: 0.9em !important; }
+.font-large .notif-item { font-size: 1.1em !important; }
+.font-large .btn, .font-large button { font-size: 1.1em !important; }
+.font-large .brain-msg { font-size: 1.1em !important; }
+.font-large .powered-badge { font-size: 0.9em !important; }
+.font-large .tech-tag { font-size: 0.9em !important; }
+.font-large .arch-label { font-size: 0.95em !important; }
+.font-large .sidebar-logo h1 { font-size: 1.5em !important; }
+.font-large td, .font-large th { font-size: 1.05em !important; }
+.font-large .compare-row { font-size: 1.05em !important; }
+.font-large .brain-input input { font-size: 1.05em !important; }
+.font-large .quick-btn { font-size: 0.95em !important; }
+.font-large .report-card { font-size: 1.05em !important; }
+.font-large .daily-digest-btn { font-size: 1.05em !important; }
+.font-large .account-subtitle { font-size: 1em !important; }
 
 /* ── Dyslexia font ── */
 .dyslexia-font, .dyslexia-font * {
