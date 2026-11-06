@@ -154,7 +154,7 @@ async function loadDashboard() {
 
         const netEl = document.getElementById('netFlow');
         animateValue(netEl, data.net_flow);
-        netEl.style.color = data.net_flow >= 0 ? '#00c853' : '#ff5252';
+        netEl.className = data.net_flow >= 0 ? 'stat-value amount-positive' : 'stat-value amount-negative';
 
         const insights = data.insights;
         document.getElementById('insightSummary').textContent = insights.summary;
@@ -733,8 +733,8 @@ function renderCompareMonths(transactions) {
     if (lastExpenses > 0) {
         const pct = ((thisExpenses - lastExpenses) / lastExpenses * 100).toFixed(1);
         const dir = pct > 0 ? 'up' : 'down';
-        const color = pct > 0 ? '#ff5252' : '#00c853';
-        changeEl.innerHTML = `<span style="color:${color}">Expenses ${dir} ${Math.abs(pct)}% vs last month</span>`;
+        const cls = pct > 0 ? 'amount-negative' : 'amount-positive';
+        changeEl.innerHTML = `<span class="${cls}">Expenses ${dir} ${Math.abs(pct)}% vs last month</span>`;
     } else {
         changeEl.innerHTML = '<span style="color:var(--text-dim)">No data for last month</span>';
     }
