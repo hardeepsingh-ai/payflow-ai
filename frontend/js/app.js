@@ -211,20 +211,25 @@ function renderCategoryChart(categories) {
         .filter(([cat]) => !cat.startsWith('Revenue'))
         .sort((a, b) => b[1] - a[1]);
 
-    const colors = [
+    const defaultColors = [
         '#0070ba', '#ffc439', '#ff5252', '#00c853', '#7c4dff',
         '#ff6d00', '#00bcd4', '#e040fb', '#64dd17', '#ffab00',
         '#18ffff', '#536dfe', '#b0bec5'
     ];
 
-    new Chart(document.getElementById('categoryChart'), {
+    const isCB = document.body.classList.contains('cb-mode');
+    const colors = isCB ? CB_COLORS : defaultColors;
+
+    const ctx = document.getElementById('categoryChart');
+    _categoryChartInstance = new Chart(ctx, {
         type: 'doughnut',
         data: {
             labels: expenseCategories.map(([c]) => c),
             datasets: [{
                 data: expenseCategories.map(([, v]) => v),
                 backgroundColor: colors.slice(0, expenseCategories.length),
-                borderWidth: 0,
+                borderWidth: _a11yPatterns ? 3 : 0,
+                borderColor: _a11yPatterns ? '#ffffff' : undefined,
                 hoverBorderWidth: 2,
                 hoverBorderColor: '#fff',
             }]
@@ -236,10 +241,43 @@ function renderCategoryChart(categories) {
                 legend: {
                     position: 'right',
                     labels: { boxWidth: 10, font: { size: 11 }, color: '#8892a4', padding: 8 }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                            const pct = ((ctx.raw / total) * 100).toFixed(1);
+                            return `${ctx.label}: £${ctx.raw.toLocaleString('en-GB', {minimumFractionDigits:2})} (${pct}%)`;
+                        }
+                    }
                 }
             }
-        }
+        },
+        plugins: _a11yDataLabels ? [{
+            id: 'doughnutLabels',
+            afterDraw(chart) {
+                const { ctx: c, data } = chart;
+                const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                chart.getDatasetMeta(0).data.forEach((arc, i) => {
+                    const pct = ((data.datasets[0].data[i] / total) * 100).toFixed(0);
+                    if (pct < 5) return;
+                    const { x, y } = arc.tooltipPosition();
+                    c.save();
+                    c.fillStyle = '#ffffff';
+                    c.font = 'bold 10px sans-serif';
+                    c.textAlign = 'center';
+                    c.fillText(pct + '%', x, y);
+                    c.restore();
+                });
+            }
+        }] : []
     });
+
+    const altEl = document.getElementById('categoryAltText');
+    if (altEl) {
+        const top3 = expenseCategories.slice(0, 3).map(([c, v]) => `${c}: £${v.toFixed(2)}`).join(', ');
+        altEl.textContent = `Top spending categories: ${top3}. ${expenseCategories.length} categories total.`;
+    }
 }
 
 function renderFlowChart(transactions) {
@@ -252,8 +290,15 @@ function renderFlowChart(transactions) {
     });
 
     const sorted = Object.entries(dailyData).sort((a, b) => a[0].localeCompare(b[0]));
+    const isCB = document.body.classList.contains('cb-mode');
 
-    new Chart(document.getElementById('flowChart'), {
+    const incomeColor = isCB ? 'rgba(0, 114, 178, 0.7)' : 'rgba(0, 200, 83, 0.7)';
+    const expenseColor = isCB ? 'rgba(213, 94, 0, 0.7)' : 'rgba(255, 82, 82, 0.7)';
+
+    const incomeBorder = _a11yPatterns ? (isCB ? '#0072B2' : '#00c853') : undefined;
+    const expenseBorder = _a11yPatterns ? (isCB ? '#D55E00' : '#ff5252') : undefined;
+
+    _flowChartInstance = new Chart(document.getElementById('flowChart'), {
         type: 'bar',
         data: {
             labels: sorted.map(([d]) => {
@@ -264,21 +309,34 @@ function renderFlowChart(transactions) {
                 {
                     label: 'Income',
                     data: sorted.map(([, v]) => v.income),
-                    backgroundColor: 'rgba(0, 200, 83, 0.7)',
+                    backgroundColor: incomeColor,
+                    borderColor: incomeBorder,
+                    borderWidth: _a11yPatterns ? 2 : 0,
                     borderRadius: 4,
+                    borderDash: _a11yPatterns ? [] : undefined,
                 },
                 {
                     label: 'Expenses',
                     data: sorted.map(([, v]) => v.expenses),
-                    backgroundColor: 'rgba(255, 82, 82, 0.7)',
+                    backgroundColor: expenseColor,
+                    borderColor: expenseBorder,
+                    borderWidth: _a11yPatterns ? 2 : 0,
                     borderRadius: 4,
+                    borderDash: _a11yPatterns ? [4, 4] : undefined,
                 }
             ]
         },
         options: {
             responsive: true,
             plugins: {
-                legend: { labels: { boxWidth: 10, font: { size: 11 }, color: '#8892a4' } }
+                legend: { labels: { boxWidth: 10, font: { size: 11 }, color: '#8892a4' } },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            return `${ctx.dataset.label}: £${ctx.raw.toLocaleString('en-GB', {minimumFractionDigits:2})}`;
+                        }
+                    }
+                }
             },
             scales: {
                 y: {
@@ -291,8 +349,33 @@ function renderFlowChart(transactions) {
                     grid: { display: false }
                 }
             }
-        }
+        },
+        plugins: _a11yDataLabels ? [{
+            id: 'barLabels',
+            afterDatasetsDraw(chart) {
+                const { ctx: c } = chart;
+                chart.data.datasets.forEach((ds, di) => {
+                    chart.getDatasetMeta(di).data.forEach((bar, i) => {
+                        const val = ds.data[i];
+                        if (val < 1) return;
+                        c.save();
+                        c.fillStyle = '#ffffff';
+                        c.font = 'bold 9px sans-serif';
+                        c.textAlign = 'center';
+                        c.fillText('£' + Math.round(val), bar.x, bar.y - 4);
+                        c.restore();
+                    });
+                });
+            }
+        }] : []
     });
+
+    const altEl = document.getElementById('flowAltText');
+    if (altEl) {
+        const totalIncome = sorted.reduce((s, [, v]) => s + v.income, 0);
+        const totalExpenses = sorted.reduce((s, [, v]) => s + v.expenses, 0);
+        altEl.textContent = `Total income: £${totalIncome.toFixed(2)}, Total expenses: £${totalExpenses.toFixed(2)} over ${sorted.length} days.`;
+    }
 }
 
 function renderTransactions(transactions) {
@@ -492,7 +575,118 @@ document.addEventListener('keydown', e => {
     }
 });
 
+// ── Accessibility Functions ──
+
+function toggleA11yPanel() {
+    const panel = document.getElementById('a11yPanel');
+    const arrow = document.getElementById('a11yArrow');
+    const btn = document.querySelector('.sidebar-section-toggle');
+    const visible = panel.style.display !== 'none';
+    panel.style.display = visible ? 'none' : 'block';
+    arrow.classList.toggle('open', !visible);
+    btn.setAttribute('aria-expanded', !visible);
+}
+
+const CB_COLORS = ['#0072B2', '#E69F00', '#56B4E9', '#009E73', '#F0E442', '#D55E00', '#CC79A7', '#000000'];
+
+function toggleColourBlind() {
+    document.body.classList.toggle('cb-mode', document.getElementById('cbToggle').checked);
+    reRenderChartsIfNeeded();
+    saveA11yPrefs();
+}
+
+function toggleHighContrast() {
+    document.body.classList.toggle('hc-mode', document.getElementById('hcToggle').checked);
+    saveA11yPrefs();
+}
+
+function togglePatternFills() {
+    _a11yPatterns = document.getElementById('patternToggle').checked;
+    reRenderChartsIfNeeded();
+    saveA11yPrefs();
+}
+
+function toggleDataLabels() {
+    _a11yDataLabels = document.getElementById('dataLabelsToggle').checked;
+    document.body.classList.toggle('show-alt-text', _a11yDataLabels);
+    reRenderChartsIfNeeded();
+    saveA11yPrefs();
+}
+
+function changeFontSize() {
+    const size = document.getElementById('fontSizeSelect').value;
+    document.body.classList.remove('font-small', 'font-medium', 'font-large');
+    document.body.classList.add('font-' + size);
+    saveA11yPrefs();
+}
+
+function toggleDyslexiaFont() {
+    document.body.classList.toggle('dyslexia-font', document.getElementById('dyslexiaToggle').checked);
+    saveA11yPrefs();
+}
+
+function toggleReducedMotion() {
+    document.body.classList.toggle('reduced-motion', document.getElementById('reducedMotionToggle').checked);
+    saveA11yPrefs();
+}
+
+function toggleSimplifiedView() {
+    document.body.classList.toggle('simplified-view', document.getElementById('simplifiedToggle').checked);
+    saveA11yPrefs();
+}
+
+let _a11yPatterns = false;
+let _a11yDataLabels = false;
+let _categoryChartInstance = null;
+let _flowChartInstance = null;
+
+function reRenderChartsIfNeeded() {
+    if (_allTransactions.length > 0) {
+        if (_categoryChartInstance) _categoryChartInstance.destroy();
+        if (_flowChartInstance) _flowChartInstance.destroy();
+        fetch(`${API_URL}/api/dashboard`).then(r => r.json()).then(data => {
+            renderCategoryChart(data.categories);
+            renderFlowChart(data.transactions);
+        }).catch(() => {});
+    }
+}
+
+function saveA11yPrefs() {
+    try {
+        localStorage.setItem('payflow_a11y', JSON.stringify({
+            cb: document.getElementById('cbToggle').checked,
+            hc: document.getElementById('hcToggle').checked,
+            patterns: document.getElementById('patternToggle').checked,
+            dataLabels: document.getElementById('dataLabelsToggle').checked,
+            fontSize: document.getElementById('fontSizeSelect').value,
+            dyslexia: document.getElementById('dyslexiaToggle').checked,
+            reducedMotion: document.getElementById('reducedMotionToggle').checked,
+            simplified: document.getElementById('simplifiedToggle').checked,
+        }));
+    } catch (e) {}
+}
+
+function loadA11yPrefs() {
+    try {
+        const saved = localStorage.getItem('payflow_a11y');
+        if (!saved) return;
+        const p = JSON.parse(saved);
+        if (p.cb) { document.getElementById('cbToggle').checked = true; document.body.classList.add('cb-mode'); }
+        if (p.hc) { document.getElementById('hcToggle').checked = true; document.body.classList.add('hc-mode'); }
+        if (p.patterns) { document.getElementById('patternToggle').checked = true; _a11yPatterns = true; }
+        if (p.dataLabels) { document.getElementById('dataLabelsToggle').checked = true; _a11yDataLabels = true; document.body.classList.add('show-alt-text'); }
+        if (p.fontSize && p.fontSize !== 'medium') {
+            document.getElementById('fontSizeSelect').value = p.fontSize;
+            document.body.classList.add('font-' + p.fontSize);
+        }
+        if (p.dyslexia) { document.getElementById('dyslexiaToggle').checked = true; document.body.classList.add('dyslexia-font'); }
+        if (p.reducedMotion) { document.getElementById('reducedMotionToggle').checked = true; document.body.classList.add('reduced-motion'); }
+        if (p.simplified) { document.getElementById('simplifiedToggle').checked = true; document.body.classList.add('simplified-view'); }
+    } catch (e) {}
+}
+
 loadTheme();
+loadA11yPrefs();
 loadBrainChat();
 
 const brainChat = document.getElementById('brainChat');

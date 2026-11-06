@@ -11,11 +11,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
+    <a href="#statsGrid" class="skip-link">Skip to main content</a>
     <button class="hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="Toggle navigation menu">&#9776;</button>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
     <div class="app-layout">
-        <aside class="sidebar" id="sidebar">
+        <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
             <div class="sidebar-logo">
                 <h1><span class="logo-icon">P</span> PayFlow <span class="ai-badge">AI</span></h1>
                 <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">☀️</button>
@@ -27,6 +28,51 @@
                 <li><a href="#insights-section"><span class="nav-icon">&#9881;</span> AI Insights</a></li>
                 <li><a href="#reports-section"><span class="nav-icon">&#128196;</span> Reports</a></li>
             </ul>
+            <div class="sidebar-section">
+                <button class="sidebar-section-toggle" onclick="toggleA11yPanel()" aria-expanded="false" aria-controls="a11yPanel">
+                    <span>&#9855; Accessibility</span>
+                    <span class="toggle-arrow" id="a11yArrow">&#9654;</span>
+                </button>
+                <div class="a11y-panel" id="a11yPanel" style="display:none;">
+                    <div class="a11y-option">
+                        <label for="cbToggle">Colour-blind mode</label>
+                        <input type="checkbox" id="cbToggle" onchange="toggleColourBlind()" aria-label="Toggle colour-blind safe palette">
+                    </div>
+                    <div class="a11y-option">
+                        <label for="hcToggle">High contrast</label>
+                        <input type="checkbox" id="hcToggle" onchange="toggleHighContrast()" aria-label="Toggle high contrast mode">
+                    </div>
+                    <div class="a11y-option">
+                        <label for="patternToggle">Pattern fills</label>
+                        <input type="checkbox" id="patternToggle" onchange="togglePatternFills()" aria-label="Toggle pattern fills on charts">
+                    </div>
+                    <div class="a11y-option">
+                        <label for="dataLabelsToggle">Data labels</label>
+                        <input type="checkbox" id="dataLabelsToggle" onchange="toggleDataLabels()" aria-label="Toggle text labels on chart data points">
+                    </div>
+                    <div class="a11y-option">
+                        <label for="fontSizeSelect">Font size</label>
+                        <select id="fontSizeSelect" onchange="changeFontSize()" aria-label="Adjust font size">
+                            <option value="small">Small</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="large">Large</option>
+                        </select>
+                    </div>
+                    <div class="a11y-option">
+                        <label for="dyslexiaToggle">Dyslexia font</label>
+                        <input type="checkbox" id="dyslexiaToggle" onchange="toggleDyslexiaFont()" aria-label="Toggle dyslexia-friendly font">
+                    </div>
+                    <div class="a11y-option">
+                        <label for="reducedMotionToggle">Reduced motion</label>
+                        <input type="checkbox" id="reducedMotionToggle" onchange="toggleReducedMotion()" aria-label="Toggle reduced motion">
+                    </div>
+                    <div class="a11y-option">
+                        <label for="simplifiedToggle">Simplified view</label>
+                        <input type="checkbox" id="simplifiedToggle" onchange="toggleSimplifiedView()" aria-label="Toggle simplified view">
+                    </div>
+                    <div class="a11y-wcag-badge">WCAG 2.1 AA</div>
+                </div>
+            </div>
             <div class="sidebar-bottom">
                 <span class="demo-badge" id="demoBadge">DEMO MODE</span>
                 <button class="connect-paypal-btn" onclick="showConnectPayPal()" aria-label="Connect your PayPal account">Connect PayPal</button>
@@ -34,7 +80,7 @@
             </div>
         </aside>
 
-        <div class="main-content">
+        <main class="main-content" role="main">
             <div class="page-header">
                 <div>
                     <h2 class="page-title">Payment Dashboard</h2>
@@ -77,26 +123,26 @@
                 </div>
             </section>
 
-            <section class="stats-grid" id="statsGrid">
-                <div class="stat-card balance">
-                    <div class="stat-icon">&#128176;</div>
+            <section class="stats-grid" id="statsGrid" role="region" aria-label="Financial summary statistics">
+                <div class="stat-card balance" role="status" aria-label="Current balance" title="Your current PayPal account balance">
+                    <div class="stat-icon" aria-hidden="true">&#128176;</div>
                     <span class="stat-label">Current Balance</span>
-                    <span class="stat-value" id="balance">--</span>
+                    <span class="stat-value" id="balance" aria-live="polite">--</span>
                 </div>
-                <div class="stat-card income">
-                    <div class="stat-icon">&#8593;</div>
+                <div class="stat-card income" role="status" aria-label="Income last 30 days" title="Total income received in the last 30 days">
+                    <div class="stat-icon" aria-hidden="true">&#8593;</div>
                     <span class="stat-label">Income (30d)</span>
-                    <span class="stat-value" id="income">--</span>
+                    <span class="stat-value" id="income" aria-live="polite">--</span>
                 </div>
-                <div class="stat-card expenses">
-                    <div class="stat-icon">&#8595;</div>
+                <div class="stat-card expenses" role="status" aria-label="Expenses last 30 days" title="Total expenses in the last 30 days">
+                    <div class="stat-icon" aria-hidden="true">&#8595;</div>
                     <span class="stat-label">Expenses (30d)</span>
-                    <span class="stat-value" id="expenses">--</span>
+                    <span class="stat-value" id="expenses" aria-live="polite">--</span>
                 </div>
-                <div class="stat-card net">
-                    <div class="stat-icon">&#9733;</div>
+                <div class="stat-card net" role="status" aria-label="Net cash flow" title="Income minus expenses for the last 30 days">
+                    <div class="stat-icon" aria-hidden="true">&#9733;</div>
                     <span class="stat-label">Net Cash Flow</span>
-                    <span class="stat-value" id="netFlow">--</span>
+                    <span class="stat-value" id="netFlow" aria-live="polite">--</span>
                 </div>
             </section>
 
@@ -111,14 +157,16 @@
                 <div class="saving-tip" id="savingTip"></div>
             </section>
 
-            <section class="charts-grid">
-                <div class="chart-card">
+            <section class="charts-grid" role="region" aria-label="Financial charts">
+                <div class="chart-card" role="img" aria-label="Doughnut chart showing spending broken down by category" title="Spending by Category - visual breakdown of where your money goes">
                     <h3>Spending by Category</h3>
-                    <canvas id="categoryChart"></canvas>
+                    <canvas id="categoryChart" aria-label="Spending by category doughnut chart"></canvas>
+                    <div class="chart-alt-text" id="categoryAltText" role="status" aria-live="polite"></div>
                 </div>
-                <div class="chart-card">
+                <div class="chart-card" role="img" aria-label="Bar chart comparing daily income and expenses" title="Income vs Expenses - daily comparison over the last 30 days">
                     <h3>Income vs Expenses</h3>
-                    <canvas id="flowChart"></canvas>
+                    <canvas id="flowChart" aria-label="Income vs expenses bar chart"></canvas>
+                    <div class="chart-alt-text" id="flowAltText" role="status" aria-live="polite"></div>
                 </div>
             </section>
 
@@ -289,7 +337,7 @@
                     <tbody id="transactionsBody"></tbody>
                 </table>
             </section>
-        </div>
+        </main>
     </div>
 
     <!-- Email Digest Modal -->
