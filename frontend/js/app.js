@@ -636,12 +636,6 @@ function toggleReducedMotion() {
     saveA11yPrefs();
 }
 
-function toggleSimplifiedView() {
-    const on = document.getElementById('simplifiedToggle').checked;
-    document.body.classList.toggle('simplified-view', on);
-    saveA11yPrefs();
-    setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 200);
-}
 
 let _a11yPatterns = false;
 let _a11yDataLabels = false;
@@ -715,7 +709,6 @@ function saveA11yPrefs() {
             fontSize: document.getElementById('fontSizeSelect').value,
             dyslexia: document.getElementById('dyslexiaToggle').checked,
             reducedMotion: document.getElementById('reducedMotionToggle').checked,
-            simplified: document.getElementById('simplifiedToggle').checked,
         }));
     } catch (e) {}
 }
@@ -735,7 +728,6 @@ function loadA11yPrefs() {
         }
         if (p.dyslexia) { document.getElementById('dyslexiaToggle').checked = true; document.body.classList.add('dyslexia-font'); }
         if (p.reducedMotion) { document.getElementById('reducedMotionToggle').checked = true; document.body.classList.add('reduced-motion'); }
-        if (p.simplified) { document.getElementById('simplifiedToggle').checked = true; document.body.classList.add('simplified-view'); }
     } catch (e) {}
 }
 

@@ -1512,15 +1512,6 @@ footer a:hover { text-decoration: underline; }
 }
 
 /* ── Simplified view ── */
-.simplified-view .architecture-flow,
-.simplified-view .arch-tech-tags,
-.simplified-view .brain-suggestions,
-.simplified-view .powered-badges,
-.simplified-view #compare-section,
-.simplified-view #architecture-section { display: none !important; }
-
-.simplified-view .charts-grid { grid-template-columns: 1fr; }
-.simplified-view .stat-card::before { height: 0; }
 
 /* ── Skip to content link ── */
 .skip-link {
