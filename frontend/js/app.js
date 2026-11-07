@@ -639,6 +639,10 @@ function toggleReducedMotion() {
 function toggleSimplifiedView() {
     document.body.classList.toggle('simplified-view', document.getElementById('simplifiedToggle').checked);
     saveA11yPrefs();
+    setTimeout(() => {
+        if (_categoryChartInstance) _categoryChartInstance.resize();
+        if (_flowChartInstance) _flowChartInstance.resize();
+    }, 100);
 }
 
 let _a11yPatterns = false;
