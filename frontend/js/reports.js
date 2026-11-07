@@ -334,7 +334,7 @@ async function generateFullPDF(txns, range, data) {
     doc.text(range.label, 105, 135, { align: 'center' });
     doc.text('Generated: ' + new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }), 105, 150, { align: 'center' });
     doc.setFontSize(10);
-    doc.text('Powered by PayPal API + Gemini AI', 105, 270, { align: 'center' });
+    doc.text('Powered by PayPal API + Claude AI', 105, 270, { align: 'center' });
 
     // Page 2 — Summary
     doc.addPage();
