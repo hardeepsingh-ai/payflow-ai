@@ -36,9 +36,15 @@ function renderMarkdown(text) {
 }
 
 function animateValue(el, target, prefix = '£') {
-    const duration = 1200;
     const isNeg = target < 0;
     const abs = Math.abs(target);
+
+    if (document.body.classList.contains('reduced-motion')) {
+        el.textContent = (isNeg ? '-' : '') + prefix + abs.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        return;
+    }
+
+    const duration = 1200;
     const start = performance.now();
 
     function step(now) {
