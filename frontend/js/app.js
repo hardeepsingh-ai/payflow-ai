@@ -637,12 +637,10 @@ function toggleReducedMotion() {
 }
 
 function toggleSimplifiedView() {
-    document.body.classList.toggle('simplified-view', document.getElementById('simplifiedToggle').checked);
+    const on = document.getElementById('simplifiedToggle').checked;
+    document.body.classList.toggle('simplified-view', on);
     saveA11yPrefs();
-    setTimeout(() => {
-        if (_categoryChartInstance) _categoryChartInstance.resize();
-        if (_flowChartInstance) _flowChartInstance.resize();
-    }, 100);
+    setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 200);
 }
 
 let _a11yPatterns = false;
