@@ -640,9 +640,16 @@ let _currentZoom = 100;
 function changeZoom(delta) {
     _currentZoom = Math.min(130, Math.max(80, _currentZoom + delta));
     const mc = document.querySelector('.main-content');
-    mc.style.transformOrigin = 'top left';
-    mc.style.transform = 'scale(' + (_currentZoom / 100) + ')';
-    mc.style.width = (100 / (_currentZoom / 100)) + '%';
+    const s = _currentZoom / 100;
+    if (s === 1) {
+        mc.style.transform = '';
+        mc.style.width = '';
+        mc.style.transformOrigin = '';
+    } else {
+        mc.style.transformOrigin = 'top left';
+        mc.style.transform = 'scale(' + s + ')';
+        mc.style.width = 'calc(' + (100 / s) + '% - ' + (240 / s) + 'px)';
+    }
     document.getElementById('zoomLevel').textContent = _currentZoom + '%';
     try { localStorage.setItem('payflow_zoom', _currentZoom); } catch(e) {}
 }
