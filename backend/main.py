@@ -182,7 +182,7 @@ async def ask_brain(query: BrainQuery):
     try:
         client = anthropic.Anthropic(api_key=api_key)
         message = client.messages.create(
-            model="claude-haiku-4-20250414",
+            model="claude-sonnet-4-20250514",
             max_tokens=2048,
             system=system_prompt,
             messages=[{
