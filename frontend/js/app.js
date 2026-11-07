@@ -301,10 +301,10 @@ function renderFlowChart(transactions) {
     const isCB = document.body.classList.contains('cb-mode');
 
     const incomeColor = isCB ? 'rgba(0, 114, 178, 0.7)' : 'rgba(0, 200, 83, 0.7)';
-    const expenseColor = isCB ? 'rgba(213, 94, 0, 0.7)' : 'rgba(255, 82, 82, 0.7)';
+    const expenseColor = isCB ? 'rgba(230, 159, 0, 0.7)' : 'rgba(255, 82, 82, 0.7)';
 
     const incomeBorder = _a11yPatterns ? (isCB ? '#0072B2' : '#00c853') : undefined;
-    const expenseBorder = _a11yPatterns ? (isCB ? '#D55E00' : '#ff5252') : undefined;
+    const expenseBorder = _a11yPatterns ? (isCB ? '#E69F00' : '#ff5252') : undefined;
 
     _flowChartInstance = new Chart(document.getElementById('flowChart'), {
         type: 'bar',
