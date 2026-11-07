@@ -641,10 +641,12 @@ function changeZoom(delta) {
     _currentZoom = Math.min(130, Math.max(80, _currentZoom + delta));
     const mc = document.querySelector('.main-content');
     const s = _currentZoom / 100;
-    if (s === 1) {
+    const isMobile = window.innerWidth <= 900;
+    if (s === 1 || isMobile) {
         mc.style.transform = '';
         mc.style.width = '';
         mc.style.transformOrigin = '';
+        _currentZoom = 100;
     } else {
         mc.style.transformOrigin = 'top left';
         mc.style.transform = 'scale(' + s + ')';
