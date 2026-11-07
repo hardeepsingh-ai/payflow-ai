@@ -636,6 +636,30 @@ function toggleReducedMotion() {
     saveA11yPrefs();
 }
 
+let _currentZoom = 100;
+function changeZoom(delta) {
+    _currentZoom = Math.min(150, Math.max(70, _currentZoom + delta));
+    document.querySelector('.main-content').style.zoom = _currentZoom / 100;
+    document.getElementById('zoomLevel').textContent = _currentZoom + '%';
+    try { localStorage.setItem('payflow_zoom', _currentZoom); } catch(e) {}
+}
+
+function readAloud(sectionId) {
+    if (speechSynthesis.speaking) { speechSynthesis.cancel(); return; }
+    let text = '';
+    if (sectionId === 'brainChat') {
+        const msgs = document.querySelectorAll('#brainChat .brain-msg.bot');
+        if (msgs.length) text = msgs[msgs.length - 1].textContent;
+        else text = 'No Brain responses yet. Ask a question first.';
+    } else {
+        const section = document.getElementById(sectionId);
+        if (section) text = section.textContent;
+    }
+    const utter = new SpeechSynthesisUtterance(text.replace(/\s+/g, ' ').trim());
+    utter.rate = 0.9;
+    utter.lang = 'en-GB';
+    speechSynthesis.speak(utter);
+}
 
 let _a11yPatterns = false;
 let _a11yDataLabels = false;
@@ -728,6 +752,8 @@ function loadA11yPrefs() {
         }
         if (p.dyslexia) { document.getElementById('dyslexiaToggle').checked = true; document.body.classList.add('dyslexia-font'); }
         if (p.reducedMotion) { document.getElementById('reducedMotionToggle').checked = true; document.body.classList.add('reduced-motion'); }
+        const z = localStorage.getItem('payflow_zoom');
+        if (z && z !== '100') { _currentZoom = parseInt(z); document.querySelector('.main-content').style.zoom = _currentZoom / 100; document.getElementById('zoomLevel').textContent = _currentZoom + '%'; }
     } catch (e) {}
 }
 

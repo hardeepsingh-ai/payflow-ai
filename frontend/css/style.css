@@ -1511,7 +1511,48 @@ footer a:hover { text-decoration: underline; }
     transition-duration: 0.01ms !important;
 }
 
-/* ── Simplified view ── */
+/* ── Read Aloud button ── */
+.read-aloud-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin-left: auto;
+    transition: background 0.2s;
+}
+.read-aloud-btn:hover { background: var(--bg-hover); }
+.panel-header { display: flex; align-items: center; gap: 8px; }
+
+/* ── Zoom controls ── */
+.zoom-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.zoom-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.zoom-btn:hover { background: var(--bg-hover); }
+#zoomLevel {
+    font-size: 12px;
+    color: var(--text-secondary);
+    min-width: 36px;
+    text-align: center;
+}
 
 /* ── Skip to content link ── */
 .skip-link {
