@@ -1,4 +1,5 @@
 import os
+import anthropic
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -134,7 +135,6 @@ def _get_transactions():
 
 @app.post("/api/brain")
 async def ask_brain(query: BrainQuery):
-    import httpx
     txns = _get_transactions()
     total_income = sum(t["amount"] for t in txns if t["amount"] > 0)
     total_expenses = sum(abs(t["amount"]) for t in txns if t["amount"] < 0)
@@ -175,35 +175,25 @@ async def ask_brain(query: BrainQuery):
         "9) CRITICAL: Always finish your response with a final verdict and recommendation. Never leave a response incomplete."
     )
 
-    gemini_key = os.getenv("GEMINI_API_KEY")
-    if not gemini_key:
-        return {"answer": "PayFlow Brain requires the Gemini AI engine. Please configure the API key to enable intelligent financial analysis."}
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+    if not api_key:
+        return {"answer": "PayFlow Brain requires an AI engine. Please configure the API key to enable intelligent financial analysis."}
 
-    last_error = None
-    for attempt in range(3):
-        try:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key={gemini_key}"
-            payload = {
-                "contents": [{"parts": [{"text": f"{system_prompt}\n\nContext: {context}\n\nQuestion: {query.question}"}]}],
-                "generationConfig": {"maxOutputTokens": 4096, "temperature": 0.2}
-            }
-            async with httpx.AsyncClient() as client:
-                resp = await client.post(url, json=payload, timeout=30)
-            data = resp.json()
-            if "error" in data:
-                last_error = f"Gemini API error: {data['error'].get('message', str(data['error']))}"
-                print(f"Attempt {attempt+1}: {last_error}")
-                continue
-            candidate = data["candidates"][0]
-            answer = candidate["content"]["parts"][0]["text"]
-            if candidate.get("finishReason") == "MAX_TOKENS":
-                answer += "\n\n**Bottom Line:** Review your recurring charges and marketing auto-charges to improve your cash flow position. Disable unauthorised Instagram and Facebook boost posts immediately."
-            return {"answer": answer}
-        except Exception as e:
-            last_error = str(e)
-            print(f"Attempt {attempt+1} failed: {e}")
-
-    return {"answer": f"I'm having trouble connecting to the AI engine right now. Please try again in a moment. (Error: {last_error})"}
+    try:
+        client = anthropic.Anthropic(api_key=api_key)
+        message = client.messages.create(
+            model="claude-haiku-4-20250414",
+            max_tokens=2048,
+            system=system_prompt,
+            messages=[{
+                "role": "user",
+                "content": f"Context: {context}\n\nQuestion: {query.question}"
+            }],
+        )
+        return {"answer": message.content[0].text}
+    except Exception as e:
+        print(f"Brain error: {e}")
+        return {"answer": f"I'm having trouble connecting to the AI engine right now. Please try again in a moment."}
 
 
 @app.get("/api/health")
