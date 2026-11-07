@@ -639,7 +639,10 @@ function toggleReducedMotion() {
 let _currentZoom = 100;
 function changeZoom(delta) {
     _currentZoom = Math.min(130, Math.max(80, _currentZoom + delta));
-    document.querySelector('.main-content').style.zoom = _currentZoom / 100;
+    const mc = document.querySelector('.main-content');
+    mc.style.transformOrigin = 'top left';
+    mc.style.transform = 'scale(' + (_currentZoom / 100) + ')';
+    mc.style.width = (100 / (_currentZoom / 100)) + '%';
     document.getElementById('zoomLevel').textContent = _currentZoom + '%';
     try { localStorage.setItem('payflow_zoom', _currentZoom); } catch(e) {}
 }
@@ -753,7 +756,7 @@ function loadA11yPrefs() {
         if (p.dyslexia) { document.getElementById('dyslexiaToggle').checked = true; document.body.classList.add('dyslexia-font'); }
         if (p.reducedMotion) { document.getElementById('reducedMotionToggle').checked = true; document.body.classList.add('reduced-motion'); }
         const z = localStorage.getItem('payflow_zoom');
-        if (z && z !== '100') { _currentZoom = parseInt(z); document.querySelector('.main-content').style.zoom = _currentZoom / 100; document.getElementById('zoomLevel').textContent = _currentZoom + '%'; }
+        if (z && z !== '100') { _currentZoom = parseInt(z); changeZoom(0); }
     } catch (e) {}
 }
 
