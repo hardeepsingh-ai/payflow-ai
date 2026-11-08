@@ -175,25 +175,43 @@ async def ask_brain(query: BrainQuery):
         "9) CRITICAL: Always finish your response with a final verdict and recommendation. Never leave a response incomplete."
     )
 
-    api_key = os.getenv("ANTHROPIC_API_KEY")
-    if not api_key:
-        return {"answer": "PayFlow Brain requires an AI engine. Please configure the API key to enable intelligent financial analysis."}
+    groq_key = os.getenv("GROQ_API_KEY")
+    anthropic_key = os.getenv("ANTHROPIC_API_KEY")
 
-    try:
-        client = anthropic.Anthropic(api_key=api_key)
-        message = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=2048,
-            system=system_prompt,
-            messages=[{
-                "role": "user",
-                "content": f"Context: {context}\n\nQuestion: {query.question}"
-            }],
-        )
-        return {"answer": message.content[0].text}
-    except Exception as e:
-        print(f"Brain error: {e}")
-        return {"answer": f"I'm having trouble connecting to the AI engine right now. Please try again in a moment."}
+    if groq_key:
+        try:
+            from groq import Groq
+            client = Groq(api_key=groq_key)
+            chat = client.chat.completions.create(
+                model="llama-3.1-70b-versatile",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": f"Context: {context}\n\nQuestion: {query.question}"}
+                ],
+                max_tokens=2048,
+            )
+            return {"answer": chat.choices[0].message.content}
+        except Exception as e:
+            print(f"Brain Groq error: {e}")
+            return {"answer": "I'm having trouble connecting to the AI engine right now. Please try again in a moment."}
+    elif anthropic_key:
+        try:
+            client = anthropic.Anthropic(api_key=anthropic_key)
+            message = client.messages.create(
+                model="claude-sonnet-4-20250514",
+                max_tokens=2048,
+                system=system_prompt,
+                messages=[{
+                    "role": "user",
+                    "content": f"Context: {context}\n\nQuestion: {query.question}"
+                }],
+            )
+            return {"answer": message.content[0].text}
+        except Exception as e:
+            print(f"Brain Anthropic error: {e}")
+            return {"answer": "I'm having trouble connecting to the AI engine right now. Please try again in a moment."}
+    else:
+        return {"answer": "PayFlow Brain requires an AI engine. Please configure the API key to enable intelligent financial analysis."}
 
 
 @app.get("/api/health")
