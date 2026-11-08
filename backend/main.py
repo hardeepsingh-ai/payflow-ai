@@ -183,7 +183,7 @@ async def ask_brain(query: BrainQuery):
             from groq import Groq
             client = Groq(api_key=groq_key)
             chat = client.chat.completions.create(
-                model="llama-3.1-70b-versatile",
+                model="qwen/qwen3.8-27b",
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": f"Context: {context}\n\nQuestion: {query.question}"}
