@@ -172,7 +172,9 @@ async def ask_brain(query: BrainQuery):
         "6) End with a concrete, actionable recommendation.\n"
         "7) Flag any unexpected auto-charges like Instagram Boost Posts.\n"
         "8) Keep your response focused and complete — group similar transactions together instead of listing every single one individually.\n"
-        "9) CRITICAL: Always finish your response with a final verdict and recommendation. Never leave a response incomplete."
+        "9) CRITICAL: Always finish your response with a final verdict and recommendation. Never leave a response incomplete.\n"
+        "10) Keep tables concise — maximum 8 rows. Summarise smaller items into an 'Other' row rather than listing every transaction.\n"
+        "11) Your ENTIRE response must fit within 600 words. Be concise but complete."
     )
 
     groq_key = os.getenv("GROQ_API_KEY")
@@ -188,7 +190,8 @@ async def ask_brain(query: BrainQuery):
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": f"Context: {context}\n\nQuestion: {query.question}"}
                 ],
-                max_tokens=2048,
+                max_tokens=4096,
+                temperature=0.7,
             )
             return {"answer": chat.choices[0].message.content}
         except Exception as e:
